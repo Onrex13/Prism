@@ -44,7 +44,7 @@ final class FocusManager {
     var focusMinutes: Int {
         get { storedFocusMinutes }
         set {
-            let v = max(5, min(120, newValue))
+            let v = newValue.clamped(to: 5...120)
             storedFocusMinutes = v
             UserDefaults.standard.set(v, forKey: focusKey)
             if state == .idle && phase == .focus { remaining = v * 60 }
@@ -54,28 +54,28 @@ final class FocusManager {
     private var storedShort: Int
     var shortMinutes: Int {
         get { storedShort }
-        set { storedShort = max(1, min(30, newValue)); UserDefaults.standard.set(storedShort, forKey: shortKey) }
+        set { storedShort = newValue.clamped(to: 1...30); UserDefaults.standard.set(storedShort, forKey: shortKey) }
     }
 
     private var storedLong: Int
     var longMinutes: Int {
         get { storedLong }
-        set { storedLong = max(5, min(60, newValue)); UserDefaults.standard.set(storedLong, forKey: longKey) }
+        set { storedLong = newValue.clamped(to: 5...60); UserDefaults.standard.set(storedLong, forKey: longKey) }
     }
 
     private var storedCycles: Int
     /// Focus sessions before a long break.
     var sessionsBeforeLong: Int {
         get { storedCycles }
-        set { storedCycles = max(2, min(8, newValue)); UserDefaults.standard.set(storedCycles, forKey: cyclesKey) }
+        set { storedCycles = newValue.clamped(to: 2...8); UserDefaults.standard.set(storedCycles, forKey: cyclesKey) }
     }
 
     private init() {
         let d = UserDefaults.standard
-        storedFocusMinutes = (d.object(forKey: focusKey) as? Int).map { max(5, min(120, $0)) } ?? 25
-        storedShort = (d.object(forKey: shortKey) as? Int).map { max(1, min(30, $0)) } ?? 5
-        storedLong = (d.object(forKey: longKey) as? Int).map { max(5, min(60, $0)) } ?? 15
-        storedCycles = (d.object(forKey: cyclesKey) as? Int).map { max(2, min(8, $0)) } ?? 4
+        storedFocusMinutes = (d.object(forKey: focusKey) as? Int).map { $0.clamped(to: 5...120) } ?? 25
+        storedShort = (d.object(forKey: shortKey) as? Int).map { $0.clamped(to: 1...30) } ?? 5
+        storedLong = (d.object(forKey: longKey) as? Int).map { $0.clamped(to: 5...60) } ?? 15
+        storedCycles = (d.object(forKey: cyclesKey) as? Int).map { $0.clamped(to: 2...8) } ?? 4
         remaining = storedFocusMinutes * 60
     }
 

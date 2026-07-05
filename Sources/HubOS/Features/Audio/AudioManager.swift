@@ -34,7 +34,7 @@ final class AudioManager {
     var volume: Float {
         get { storedVolume }
         set {
-            let v = min(1, max(0, newValue))
+            let v = newValue.clamped(to: 0...1)
             storedVolume = v
             Self.setOutputVolume(defaultOutputID, v)
         }

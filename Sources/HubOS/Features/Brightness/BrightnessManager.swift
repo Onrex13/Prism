@@ -19,7 +19,7 @@ final class BrightnessManager {
     var intensity: Double {
         get { storedIntensity }
         set {
-            let clamped = min(1, max(0, newValue))
+            let clamped = newValue.clamped(to: 0...1)
             storedIntensity = clamped
             UserDefaults.standard.set(clamped, forKey: intensityKey)
             if isActive { applyValue() }
@@ -32,7 +32,7 @@ final class BrightnessManager {
 
     private init() {
         let stored = UserDefaults.standard.object(forKey: intensityKey) as? Double
-        intensity = stored.map { min(1, max(0, $0)) } ?? 0.6
+        intensity = stored.map { $0.clamped(to: 0...1) } ?? 0.6
     }
 
     // MARK: Capability
