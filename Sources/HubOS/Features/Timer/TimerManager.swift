@@ -39,7 +39,7 @@ final class TimerManager {
         }
     }
 
-    private var timer: Timer?
+    private let ticker = PeriodicTask()
     private let presetKey = "hubos.timer.preset"
 
     private init() {
@@ -78,16 +78,13 @@ final class TimerManager {
     func run() {
         if state == .idle && isCountdown && remaining == 0 { remaining = presetSeconds }
         state = .running
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.tick() }
-        }
+        ticker.start(every: 1) { [weak self] in self?.tick() }
     }
 
-    func pause() { state = .paused; timer?.invalidate(); timer = nil }
+    func pause() { state = .paused; ticker.stop() }
 
     func reset() {
-        timer?.invalidate(); timer = nil
+        ticker.stop()
         state = .idle
         elapsed = 0
         remaining = presetSeconds
@@ -111,7 +108,7 @@ final class TimerManager {
     }
 
     private func finish() {
-        timer?.invalidate(); timer = nil
+        ticker.stop()
         state = .idle
         NSSound(named: "Submarine")?.play()
         remaining = presetSeconds

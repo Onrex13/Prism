@@ -30,7 +30,7 @@ final class FocusManager {
     /// Focus sessions finished all-time this launch (for the header count).
     private(set) var totalFocus = 0
 
-    private var timer: Timer?
+    private let ticker = PeriodicTask()
     private let focusKey = "hubos.focus.minutes"
     private let shortKey = "hubos.focus.short"
     private let longKey = "hubos.focus.long"
@@ -116,20 +116,17 @@ final class FocusManager {
 
     func run() {
         state = .running
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.tick() }
-        }
+        ticker.start(every: 1) { [weak self] in self?.tick() }
     }
 
     func pause() {
         state = .paused
-        timer?.invalidate(); timer = nil
+        ticker.stop()
     }
 
     /// Full stop back to a fresh focus phase.
     func reset() {
-        timer?.invalidate(); timer = nil
+        ticker.stop()
         state = .idle
         phase = .focus
         completedFocus = 0

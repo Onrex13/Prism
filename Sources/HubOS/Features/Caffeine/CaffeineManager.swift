@@ -40,7 +40,7 @@ final class CaffeineManager {
     private(set) var remainingSeconds: Int?
 
     private var assertionID: IOPMAssertionID = 0
-    private var countdown: Timer?
+    private let countdown = PeriodicTask()
 
     private let modeKey = "hubos.caffeine.mode"
     private let durationKey = "hubos.caffeine.duration"
@@ -86,7 +86,7 @@ final class CaffeineManager {
             startCountdown()
         } else {
             release()
-            countdown?.invalidate(); countdown = nil
+            countdown.stop()
             remainingSeconds = nil
         }
     }
@@ -127,22 +127,20 @@ final class CaffeineManager {
     // MARK: Timed session
 
     private func startCountdown() {
-        countdown?.invalidate(); countdown = nil
+        countdown.stop()
         guard let minutes = duration, minutes > 0 else {
             remainingSeconds = nil
             return
         }
         remainingSeconds = minutes * 60
-        countdown = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                guard let self, let left = self.remainingSeconds else { return }
-                if left <= 1 {
-                    // Session elapsed — flip the module off so the tile switch
-                    // and persisted state stay in sync (setActive is idempotent).
-                    HubState.shared.setEnabled(.caffeine, false)
-                } else {
-                    self.remainingSeconds = left - 1
-                }
+        countdown.start(every: 1) { [weak self] in
+            guard let self, let left = self.remainingSeconds else { return }
+            if left <= 1 {
+                // Session elapsed — flip the module off so the tile switch
+                // and persisted state stay in sync (setActive is idempotent).
+                HubState.shared.setEnabled(.caffeine, false)
+            } else {
+                self.remainingSeconds = left - 1
             }
         }
     }
