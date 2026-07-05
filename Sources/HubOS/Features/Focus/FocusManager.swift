@@ -35,6 +35,7 @@ final class FocusManager {
     private let shortKey = "hubos.focus.short"
     private let longKey = "hubos.focus.long"
     private let cyclesKey = "hubos.focus.cycles"
+    private let sessionKey = "hubos.focus.session"
 
     // Persisted, editable settings (computed over backing to avoid the
     // `@Observable` + `didSet` self-reassignment recursion trap).
@@ -77,6 +78,7 @@ final class FocusManager {
         storedLong = (d.object(forKey: longKey) as? Int).map { $0.clamped(to: 5...60) } ?? 15
         storedCycles = (d.object(forKey: cyclesKey) as? Int).map { $0.clamped(to: 2...8) } ?? 4
         remaining = storedFocusMinutes * 60
+        restoreSession()
     }
 
     // MARK: Derived
@@ -117,11 +119,13 @@ final class FocusManager {
     func run() {
         state = .running
         ticker.start(every: 1) { [weak self] in self?.tick() }
+        persistSession()
     }
 
     func pause() {
         state = .paused
         ticker.stop()
+        persistSession()
     }
 
     /// Full stop back to a fresh focus phase.
@@ -131,6 +135,7 @@ final class FocusManager {
         phase = .focus
         completedFocus = 0
         remaining = phaseLength(.focus)
+        persistSession()
     }
 
     /// Jump to the next phase immediately (counts an in-progress focus as done).
@@ -141,7 +146,7 @@ final class FocusManager {
     private func tick() {
         guard remaining > 0 else { advance(userSkipped: false); return }
         remaining -= 1
-        if remaining == 0 { advance(userSkipped: false) }
+        if remaining == 0 { advance(userSkipped: false) } else { persistSession() }
     }
 
     private func advance(userSkipped: Bool) {
@@ -165,6 +170,37 @@ final class FocusManager {
 
     private func chime() {
         NSSound(named: phase == .focus ? "Ping" : "Glass")?.play()
+    }
+
+    // MARK: Session persistence
+
+    /// A running/paused Pomodoro serialized so it survives quitting the app. Idle
+    /// clears it. Restored as paused (never advanced during downtime).
+    private struct Session: Codable {
+        var phase: String; var remaining: Int; var completedFocus: Int; var totalFocus: Int; var savedAt: Date
+    }
+
+    private func persistSession() {
+        let d = UserDefaults.standard
+        guard state != .idle else { d.removeObject(forKey: sessionKey); return }
+        let s = Session(phase: phase.rawValue, remaining: remaining,
+                        completedFocus: completedFocus, totalFocus: totalFocus, savedAt: Date())
+        if let data = try? JSONEncoder().encode(s) { d.set(data, forKey: sessionKey) }
+    }
+
+    private func restoreSession() {
+        let d = UserDefaults.standard
+        guard let data = d.data(forKey: sessionKey),
+              let s = try? JSONDecoder().decode(Session.self, from: data) else { return }
+        // Drop stale sessions (older than 12h) rather than resurrecting them.
+        guard Date().timeIntervalSince(s.savedAt) < 12 * 3600 else {
+            d.removeObject(forKey: sessionKey); return
+        }
+        phase = Phase(rawValue: s.phase) ?? .focus
+        remaining = s.remaining
+        completedFocus = s.completedFocus
+        totalFocus = s.totalFocus
+        state = .paused
     }
 
     // MARK: Preview

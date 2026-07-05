@@ -41,10 +41,12 @@ final class TimerManager {
 
     private let ticker = PeriodicTask()
     private let presetKey = "hubos.timer.preset"
+    private let sessionKey = "hubos.timer.session"
 
     private init() {
         storedPreset = UserDefaults.standard.object(forKey: presetKey) as? Int ?? 300
         remaining = storedPreset
+        restoreSession()
     }
 
     // MARK: Derived
@@ -79,15 +81,17 @@ final class TimerManager {
         if state == .idle && isCountdown && remaining == 0 { remaining = presetSeconds }
         state = .running
         ticker.start(every: 1) { [weak self] in self?.tick() }
+        persistSession()
     }
 
-    func pause() { state = .paused; ticker.stop() }
+    func pause() { state = .paused; ticker.stop(); persistSession() }
 
     func reset() {
         ticker.stop()
         state = .idle
         elapsed = 0
         remaining = presetSeconds
+        persistSession()
     }
 
     /// Adds minutes to a running/idle countdown (e.g. +1, +5).
@@ -95,6 +99,7 @@ final class TimerManager {
         guard isCountdown else { return }
         remaining = max(0, remaining + m * 60)
         if state == .idle { presetSeconds = remaining }
+        persistSession()
     }
 
     private func tick() {
@@ -105,6 +110,7 @@ final class TimerManager {
         } else {
             elapsed += 1
         }
+        persistSession()
     }
 
     private func finish() {
@@ -112,6 +118,34 @@ final class TimerManager {
         state = .idle
         NSSound(named: "Submarine")?.play()
         remaining = presetSeconds
+        persistSession()
+    }
+
+    // MARK: Session persistence
+
+    /// A running/paused timer serialized so it survives quitting the app. Idle
+    /// clears it. Restored as paused (never advanced during downtime).
+    private struct Session: Codable { var mode: String; var remaining: Int; var elapsed: Int; var savedAt: Date }
+
+    private func persistSession() {
+        let d = UserDefaults.standard
+        guard state != .idle else { d.removeObject(forKey: sessionKey); return }
+        let s = Session(mode: storedMode.rawValue, remaining: remaining, elapsed: elapsed, savedAt: Date())
+        if let data = try? JSONEncoder().encode(s) { d.set(data, forKey: sessionKey) }
+    }
+
+    private func restoreSession() {
+        let d = UserDefaults.standard
+        guard let data = d.data(forKey: sessionKey),
+              let s = try? JSONDecoder().decode(Session.self, from: data) else { return }
+        // Drop stale sessions (older than 12h) rather than resurrecting them.
+        guard Date().timeIntervalSince(s.savedAt) < 12 * 3600 else {
+            d.removeObject(forKey: sessionKey); return
+        }
+        storedMode = Mode(rawValue: s.mode) ?? .countdown
+        remaining = s.remaining
+        elapsed = s.elapsed
+        state = .paused
     }
 
     func seedPreview() {
