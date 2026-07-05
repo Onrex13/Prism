@@ -56,8 +56,23 @@ final class AudioManager {
         storedVolume = vol ?? 0
     }
 
-    func selectOutput(_ d: Device) { Self.setDefault(d.id, output: true); refresh() }
-    func selectInput(_ d: Device) { Self.setDefault(d.id, output: false); refresh() }
+    func selectOutput(_ d: Device) {
+        let status = Self.setDefault(d.id, output: true)
+        refresh()
+        if status != noErr || defaultOutputID != d.id {
+            Notifier.shared.error(L(fr: "Impossible de basculer sur \(d.name)",
+                                    en: "Couldn't switch to \(d.name)"))
+        }
+    }
+
+    func selectInput(_ d: Device) {
+        let status = Self.setDefault(d.id, output: false)
+        refresh()
+        if status != noErr || defaultInputID != d.id {
+            Notifier.shared.error(L(fr: "Impossible de basculer sur \(d.name)",
+                                    en: "Couldn't switch to \(d.name)"))
+        }
+    }
 
     /// Preview-only device list.
     func seedPreview() {
@@ -139,11 +154,12 @@ final class AudioManager {
         return id
     }
 
-    nonisolated private static func setDefault(_ id: AudioDeviceID, output: Bool) {
+    @discardableResult
+    nonisolated private static func setDefault(_ id: AudioDeviceID, output: Bool) -> OSStatus {
         var addr = address(output ? kAudioHardwarePropertyDefaultOutputDevice
                                   : kAudioHardwarePropertyDefaultInputDevice)
         var dev = id
-        AudioObjectSetPropertyData(system, &addr, 0, nil, UInt32(MemoryLayout<AudioDeviceID>.size), &dev)
+        return AudioObjectSetPropertyData(system, &addr, 0, nil, UInt32(MemoryLayout<AudioDeviceID>.size), &dev)
     }
 
     nonisolated private static func outputVolume(_ id: AudioDeviceID) -> Float? {

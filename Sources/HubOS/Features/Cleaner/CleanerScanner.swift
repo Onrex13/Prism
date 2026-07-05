@@ -73,6 +73,9 @@ final class CleanerScanner {
         }
         categories = result
         phase = .done
+        let freedText = ByteCountFormatter.string(fromByteCount: freed, countStyle: .file)
+        Notifier.shared.success(L(fr: "Nettoyage terminé · \(freedText) libérés",
+                                  en: "Cleanup complete · \(freedText) freed"))
     }
 
     func reset() { phase = .idle; categories = []; lastFreed = 0 }

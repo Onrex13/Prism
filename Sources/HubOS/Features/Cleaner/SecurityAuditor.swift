@@ -91,7 +91,14 @@ final class SecurityAuditor {
     /// no admin rights or system files are involved.
     func quarantine(_ f: Finding) async {
         guard f.userWritable, f.severity != .ok else { return }
-        await Task.detached { Self.performQuarantine(f.plistPath) }.value
+        let failure = await Task.detached { Self.performQuarantine(f.plistPath) }.value
+        if let failure {
+            Notifier.shared.error(L(fr: "Quarantaine impossible : \(f.name)",
+                                    en: "Couldn't quarantine \(f.name)"), detail: failure)
+        } else {
+            Notifier.shared.success(L(fr: "\(f.name) mis en quarantaine",
+                                      en: "\(f.name) quarantined"))
+        }
         await scan()
     }
 
@@ -173,7 +180,10 @@ final class SecurityAuditor {
         return (true, signer)
     }
 
-    nonisolated private static func performQuarantine(_ plistPath: String) {
+    /// Returns `nil` on success, or a human-readable reason on failure — the
+    /// move out of the launch directory is what actually matters, so its error
+    /// is surfaced instead of being swallowed.
+    nonisolated private static func performQuarantine(_ plistPath: String) -> String? {
         let fm = FileManager.default
         let quarantine = fm.homeDirectoryForCurrentUser.appendingPathComponent(".hubos-quarantine")
         try? fm.createDirectory(at: quarantine, withIntermediateDirectories: true)
@@ -185,6 +195,11 @@ final class SecurityAuditor {
         // Move the plist out of the launch directory.
         let dest = quarantine.appendingPathComponent(URL(fileURLWithPath: plistPath).lastPathComponent)
         try? fm.removeItem(at: dest)
-        try? fm.moveItem(at: URL(fileURLWithPath: plistPath), to: dest)
+        do {
+            try fm.moveItem(at: URL(fileURLWithPath: plistPath), to: dest)
+            return nil
+        } catch {
+            return error.localizedDescription
+        }
     }
 }

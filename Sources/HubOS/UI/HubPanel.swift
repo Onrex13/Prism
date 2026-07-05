@@ -39,6 +39,15 @@ struct HubPanel: View {
         }
         .frame(width: Theme.panelWidth)
         .background(PanelBackground())
+        .overlay(alignment: .bottom) {
+            if let toast = Notifier.shared.toast {
+                ToastBanner(toast: toast)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(duration: 0.32), value: Notifier.shared.toast)
     }
 
     // MARK: Header
@@ -150,6 +159,30 @@ struct HubPanel: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+    }
+}
+
+/// Transient outcome banner shown at the bottom of the panel (see `Notifier`).
+private struct ToastBanner: View {
+    let toast: Notifier.Toast
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: toast.isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(toast.isError ? Theme.red : Theme.green)
+            Text(toast.message)
+                .font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(.primary)
+                .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button { Notifier.shared.dismiss() } label: {
+                Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 9)
+        .glassCard(radius: 12)
     }
 }
 
