@@ -1,0 +1,14 @@
+# Build output
+.build/
+dist/
+
+# macOS
+.DS_Store
+
+# Xcode / SwiftPM local
+*.xcodeproj
+.swiftpm/
+Package.resolved
+
+# Scratch
+*.png.tmp
