@@ -105,11 +105,13 @@ struct HubPanel: View {
     private var showingDetail: Bool { hub.openModule != nil || hub.showingSettings }
 
     private var headerSubtitle: String {
-        if hub.showingSettings { return "Réglages · permissions · mises à jour" }
+        if hub.showingSettings {
+            return L(fr: "Réglages · permissions · mises à jour", en: "Settings · permissions · updates")
+        }
         if let open = hub.openModule {
             return ModuleInfo.info(for: open).subtitle
         }
-        return "Ton Mac, en mieux."
+        return L(fr: "Ton Mac, en mieux.", en: "Your Mac, but better.")
     }
 
     // MARK: Grid
@@ -120,8 +122,8 @@ struct HubPanel: View {
         VStack(alignment: .leading, spacing: 14) {
             // Services run in the background (toggleable); tools open on demand.
             // (Launch-at-login lives in Settings now.)
-            moduleSection("Services actifs", ModuleInfo.all.filter { $0.hasToggle })
-            moduleSection("Outils", ModuleInfo.all.filter { !$0.hasToggle })
+            moduleSection(L(fr: "Services actifs", en: "Active services"), ModuleInfo.all.filter { $0.hasToggle })
+            moduleSection(L(fr: "Outils", en: "Tools"), ModuleInfo.all.filter { !$0.hasToggle })
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(16)
@@ -151,7 +153,7 @@ struct HubPanel: View {
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "power")
-                    Text("Quitter")
+                    Text(L(fr: "Quitter", en: "Quit"))
                 }
                 .font(.system(size: 11, weight: .medium))
             }

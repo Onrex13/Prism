@@ -21,14 +21,21 @@ final class PermissionsManager {
     /// True once the user has granted Accessibility (auto-paste, quick-paste).
     private(set) var accessibilityGranted = false
 
-    let permissions: [Permission] = [
-        Permission(id: "accessibility", name: "Accessibilité",
-                   detail: "Collage automatique du presse-papiers (⌘V) et barre de collage rapide",
-                   symbol: "accessibility", checkable: true),
-        Permission(id: "automation", name: "Événements Apple (Automation)",
-                   detail: "Contrôler Spotify / Musique. S'accorde à la 1ʳᵉ commande média depuis l'île (macOS le demande alors) — impossible à activer à l'avance.",
-                   symbol: "apple.terminal", checkable: false)
-    ]
+    /// Computed (not stored) so the labels follow the live language.
+    var permissions: [Permission] {
+        [
+            Permission(id: "accessibility",
+                       name: L(fr: "Accessibilité", en: "Accessibility"),
+                       detail: L(fr: "Collage automatique du presse-papiers (⌘V) et barre de collage rapide",
+                                 en: "Clipboard auto-paste (⌘V) and the quick-paste bar"),
+                       symbol: "accessibility", checkable: true),
+            Permission(id: "automation",
+                       name: L(fr: "Événements Apple (Automation)", en: "Apple Events (Automation)"),
+                       detail: L(fr: "Contrôler Spotify / Musique. S'accorde à la 1ʳᵉ commande média depuis l'île (macOS le demande alors) — impossible à activer à l'avance.",
+                                 en: "Control Spotify / Music. Granted on the first media command from the island (macOS asks then) — can't be pre-enabled."),
+                       symbol: "apple.terminal", checkable: false)
+        ]
+    }
 
     private init() { refresh() }
 
