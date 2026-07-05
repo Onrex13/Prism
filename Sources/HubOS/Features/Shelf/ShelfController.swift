@@ -44,6 +44,8 @@ final class ShelfController {
         screenObserver = nil
         window?.orderOut(nil)
         window = nil
+        holdTimer?.invalidate(); holdTimer = nil
+        holdUntil = nil
     }
 
     func debugReveal(_ value: Bool) { model.revealed = value }

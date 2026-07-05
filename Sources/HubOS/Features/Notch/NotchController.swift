@@ -49,6 +49,8 @@ final class NotchController {
         screenObserver = nil
         window?.orderOut(nil)
         window = nil
+        flashTimer?.invalidate(); flashTimer = nil
+        model.flash = nil
         NowPlayingMonitor.shared.stop()
         BatteryMonitor.shared.stop()
     }
