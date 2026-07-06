@@ -9,6 +9,7 @@ enum ClipKind: String, Codable {
     case color
     case image
     case file
+    case emoji
 }
 
 /// A single entry in the clipboard history. Codable metadata only — image
@@ -59,6 +60,7 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
         case .color: return "paintpalette.fill"
         case .image: return "photo.fill"
         case .file:  return "doc.fill"
+        case .emoji: return "face.smiling"
         }
     }
 
@@ -69,6 +71,7 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
         case .color: return swatchColor ?? Theme.violet
         case .image: return Theme.pink
         case .file:  return Theme.amber
+        case .emoji: return Theme.amber
         }
     }
 
@@ -84,6 +87,8 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
         case .file:
             let names = (filePaths ?? []).map { ($0 as NSString).lastPathComponent }
             return names.first ?? L(fr: "Fichier", en: "File")
+        case .emoji:
+            return text.trimmingCharacters(in: .whitespacesAndNewlines)
         case .text:
             return text.trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: "\n", with: " ")
@@ -98,6 +103,7 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
         case .link:  parts.append(L(fr: "Lien", en: "Link"))
         case .color: parts.append(L(fr: "Couleur", en: "Color"))
         case .image: parts.append(L(fr: "Image", en: "Image"))
+        case .emoji: parts.append(L(fr: "Emoji", en: "Emoji"))
         case .file:
             let n = filePaths?.count ?? 1
             parts.append(n > 1 ? L(fr: "\(n) fichiers", en: "\(n) files") : L(fr: "Fichier", en: "File"))
@@ -107,23 +113,73 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
         return parts.joined(separator: " · ")
     }
 
-    /// Parses a `#RGB`/`#RRGGBB` hex string into a Color for `.color` items.
+    /// The swatch colour for a `.color` item.
     var swatchColor: Color? {
         guard kind == .color else { return nil }
-        var hex = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        if hex.hasPrefix("#") { hex.removeFirst() }
-        guard let value = UInt64(hex, radix: 16) else { return nil }
-        let r, g, b: Double
-        if hex.count == 6 {
-            r = Double((value & 0xFF0000) >> 16) / 255
-            g = Double((value & 0x00FF00) >> 8) / 255
-            b = Double(value & 0x0000FF) / 255
-        } else if hex.count == 3 {
-            r = Double((value & 0xF00) >> 8) / 15
-            g = Double((value & 0x0F0) >> 4) / 15
-            b = Double(value & 0x00F) / 15
-        } else { return nil }
-        return Color(red: r, green: g, blue: b)
+        return Self.parseColor(text)
+    }
+
+    /// Parses a `#hex`, `rgb()/rgba()` or `hsl()/hsla()` string into a Color, or
+    /// `nil` if unrecognised. Used both to render swatches and to classify copies.
+    static func parseColor(_ raw: String) -> Color? {
+        let s = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if s.hasPrefix("#") {
+            var hex = s; hex.removeFirst()
+            guard let v = UInt64(hex, radix: 16) else { return nil }
+            if hex.count == 6 {
+                return Color(red: Double((v >> 16) & 0xFF) / 255,
+                             green: Double((v >> 8) & 0xFF) / 255,
+                             blue: Double(v & 0xFF) / 255)
+            } else if hex.count == 3 {
+                return Color(red: Double((v >> 8) & 0xF) / 15,
+                             green: Double((v >> 4) & 0xF) / 15,
+                             blue: Double(v & 0xF) / 15)
+            }
+            return nil
+        }
+        let nums = s.components(separatedBy: CharacterSet(charactersIn: "0123456789.").inverted)
+            .compactMap(Double.init)
+        if s.hasPrefix("rgb"), nums.count >= 3 {
+            return Color(red: (nums[0] / 255).clamped(to: 0...1),
+                         green: (nums[1] / 255).clamped(to: 0...1),
+                         blue: (nums[2] / 255).clamped(to: 0...1))
+        }
+        if s.hasPrefix("hsl"), nums.count >= 3 {
+            return hslColor(h: nums[0] / 360, s: (nums[1] / 100).clamped(to: 0...1), l: (nums[2] / 100).clamped(to: 0...1))
+        }
+        return nil
+    }
+
+    private static func hslColor(h: Double, s: Double, l: Double) -> Color {
+        let c = (1 - abs(2 * l - 1)) * s
+        let x = c * (1 - abs((h * 6).truncatingRemainder(dividingBy: 2) - 1))
+        let m = l - c / 2
+        let (r, g, b): (Double, Double, Double)
+        switch h * 6 {
+        case 0..<1:  (r, g, b) = (c, x, 0)
+        case 1..<2:  (r, g, b) = (x, c, 0)
+        case 2..<3:  (r, g, b) = (0, c, x)
+        case 3..<4:  (r, g, b) = (0, x, c)
+        case 4..<5:  (r, g, b) = (x, 0, c)
+        default:     (r, g, b) = (c, 0, x)
+        }
+        return Color(red: r + m, green: g + m, blue: b + m)
+    }
+
+    /// A stable colour derived from a link's host, for the favicon-less avatar.
+    static func domainColor(_ host: String) -> Color {
+        let sum = host.unicodeScalars.reduce(0) { $0 + Int($1.value) }
+        return Color(hue: Double(sum % 360) / 360, saturation: 0.5, brightness: 0.82)
+    }
+
+    /// True when a string is just a short run of emoji (so it can be shown as-is).
+    static func isEmojiOnly(_ string: String) -> Bool {
+        let chars = string.filter { !$0.isWhitespace }
+        guard !chars.isEmpty, chars.count <= 8 else { return false }
+        return chars.allSatisfy { c in
+            c.unicodeScalars.contains { $0.properties.isEmojiPresentation }
+                || (c.unicodeScalars.count > 1 && (c.unicodeScalars.first?.properties.isEmoji ?? false))
+        }
     }
 
     @MainActor private static func relativeAge(from: Date, to: Date) -> String {

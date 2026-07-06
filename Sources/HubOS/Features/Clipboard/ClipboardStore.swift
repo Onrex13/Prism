@@ -73,6 +73,7 @@ final class ClipboardStore {
             let name = item.filePaths?.first.map { ($0 as NSString).lastPathComponent } ?? L(fr: "Fichier", en: "File")
             return L(fr: "Copié · \(name)", en: "Copied · \(name)")
         case .color: return L(fr: "Copié · \(item.text)", en: "Copied · \(item.text)")
+        case .emoji: return L(fr: "Copié · \(item.text)", en: "Copied · \(item.text)")
         case .link, .text:
             let s = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: "\n", with: " ")
@@ -127,9 +128,8 @@ final class ClipboardStore {
 
     private func classify(_ string: String) -> ClipKind {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.range(of: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", options: .regularExpression) != nil {
-            return .color
-        }
+        if ClipboardItem.isEmojiOnly(trimmed) { return .emoji }
+        if ClipboardItem.parseColor(trimmed) != nil { return .color }
         if !trimmed.contains(" "), !trimmed.contains("\n"),
            let url = URL(string: trimmed), let scheme = url.scheme,
            ["http", "https"].contains(scheme.lowercased()) {
@@ -196,7 +196,7 @@ final class ClipboardStore {
         case .file:
             let urls = (item.filePaths ?? []).map { URL(fileURLWithPath: $0) as NSURL }
             if !urls.isEmpty { pb.writeObjects(urls) }
-        case .text, .link, .color:
+        case .text, .link, .color, .emoji:
             pb.setString(item.text, forType: .string)
         }
         lastChangeCount = pb.changeCount
@@ -296,6 +296,10 @@ final class ClipboardStore {
                           date: Date(timeIntervalSinceNow: -600), source: "Notes"),
             ClipboardItem(kind: .color, text: "#6B5CFA",
                           date: Date(timeIntervalSinceNow: -1800), source: "Figma"),
+            ClipboardItem(kind: .emoji, text: "🚀✨",
+                          date: Date(timeIntervalSinceNow: -2400), source: "Messages"),
+            ClipboardItem(kind: .color, text: "rgb(34, 197, 94)",
+                          date: Date(timeIntervalSinceNow: -3000), source: "Figma"),
             ClipboardItem(kind: .file, text: "/Users/onrex/Desktop/HubOS/dist/HubOS.dmg",
                           filePaths: ["/Users/onrex/Desktop/HubOS/dist/HubOS.dmg"],
                           date: Date(timeIntervalSinceNow: -7200), source: "Finder")

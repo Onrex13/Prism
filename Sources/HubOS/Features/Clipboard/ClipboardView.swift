@@ -176,6 +176,40 @@ private struct ClipboardRow: View {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .strokeBorder(.white.opacity(0.25), lineWidth: 0.75)
                 }
+        case .emoji:
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Theme.amber.opacity(0.16))
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Text(item.text).font(.system(size: 22))
+                        .lineLimit(1).minimumScaleFactor(0.4).padding(3)
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+                }
+        case .link:
+            let host = URL(string: item.text)?.host ?? item.text
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(ClipboardItem.domainColor(host))
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Text(host.first.map { String($0).uppercased() } ?? "•")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: "globe")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(2.5)
+                        .background(Circle().fill(.black.opacity(0.4)))
+                        .offset(x: 2, y: 2)
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(.white.opacity(0.18), lineWidth: 0.5)
+                }
         default:
             IconBadge(symbol: item.symbol, tint: item.accent)
         }

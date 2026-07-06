@@ -157,6 +157,11 @@ private struct QuickCard: View {
                     .foregroundStyle(.white)
                     .shadow(radius: 2)
             }
+        case .emoji:
+            ZStack {
+                Theme.amber.opacity(0.18)
+                Text(item.text).font(.system(size: 42))
+            }
         case .text, .link, .file:
             textPreview
         }
@@ -217,6 +222,7 @@ private struct QuickCard: View {
         case .link:  return item.source ?? L(fr: "Lien", en: "Link")
         case .file:  return item.source ?? L(fr: "Fichier", en: "File")
         case .text:  return item.source ?? L(fr: "Texte", en: "Text")
+        case .emoji: return L(fr: "Emoji", en: "Emoji")
         }
     }
 }
