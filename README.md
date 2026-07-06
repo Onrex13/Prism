@@ -11,9 +11,9 @@
 
 ---
 
-**Prism** is a native macOS menu-bar app that bundles ten everyday utilities behind one gorgeous Liquid Glass panel — clipboard history, a Dynamic Island for the notch, a drag-and-drop shelf, brightness beyond max, keep-awake, a Pomodoro, a timer, an audio switcher, battery telemetry, and a Mac cleaner.
+**Prism** is a native macOS menu-bar app that bundles fourteen everyday utilities behind one gorgeous Liquid Glass panel — clipboard history, a Dynamic Island for the notch, a drag-and-drop shelf, brightness beyond max, keep-awake, a Pomodoro, a timer, an audio switcher, battery telemetry, a Mac cleaner, a colour picker, a network monitor, break reminders, and a clean-desktop toggle. Fully bilingual (EN/FR).
 
-**Prism** est une app native de barre de menus macOS qui réunit dix utilitaires du quotidien derrière un seul panneau Liquid Glass — historique du presse-papiers, Dynamic Island sur l'encoche, étagère glisser-déposer, luminosité au-delà du max, anti-veille, Pomodoro, minuteur, switcher audio, télémétrie batterie et nettoyage du Mac.
+**Prism** est une app native de barre de menus macOS qui réunit quatorze utilitaires du quotidien derrière un seul panneau Liquid Glass — historique du presse-papiers, Dynamic Island sur l'encoche, étagère glisser-déposer, luminosité au-delà du max, anti-veille, Pomodoro, minuteur, switcher audio, télémétrie batterie, nettoyage du Mac, pipette de couleur, moniteur réseau, rappels de pause et masquage des icônes du bureau. Entièrement bilingue (FR/EN).
 
 <div align="center">
 <img src="docs/island.png" width="600" alt="Dynamic Island" />
@@ -33,6 +33,10 @@
 | 🔊 | **Audio** | Switch output/input device and set volume in one click | Bascule sortie/entrée et volume en un clic |
 | 🔋 | **Battery** | Health, cycles, charge & voltage from IOKit | Santé, cycles, charge & tension via IOKit |
 | ✨ | **Cleaner** | Reclaim disk space · live memory monitor · startup/adware audit | Espace disque · moniteur mémoire · audit démarrage/adware |
+| 🎨 | **Color Picker** | Screen eyedropper **+** an inline web-style colour selector, with history | Pipette écran **+** sélecteur de couleur inline, avec historique |
+| 📶 | **Network** | Live up/down throughput + local IP — kernel-read, no network calls | Débit ↑/↓ live + IP locale — lecture noyau, sans requête |
+| 🚶 | **Breaks** | Gentle break reminders on a set interval | Rappels de pause à intervalle régulier |
+| 🖥️ | **Clean Desktop** | Hide the desktop icons with one toggle | Masque les icônes du bureau en un clic |
 
 <div align="center">
 <img src="docs/cleaner.png" width="380" alt="Cleaner — memory" />&nbsp;&nbsp;<img src="docs/settings.png" width="380" alt="Settings" />
@@ -64,7 +68,7 @@ No data leaves your Mac. Prism is non-sandboxed and phones nowhere (beyond check
 ## 🛠️ Build from source · Compiler
 
 ```bash
-git clone https://github.com/CHANGE_ME/Prism.git
+git clone https://github.com/Onrex13/Prism.git
 cd Prism
 make app     # build dist/Prism.app
 make run     # build + launch
