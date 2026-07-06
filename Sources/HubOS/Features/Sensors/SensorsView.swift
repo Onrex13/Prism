@@ -12,6 +12,7 @@ struct SensorsView: View {
                 gauge(L(fr: "Mémoire", en: "Memory"), s.ramFraction, Theme.teal)
             }
             infoCard
+            if !s.bluetooth.isEmpty { bluetoothCard }
             Label(L(fr: "Lecture noyau en direct · aucune connexion",
                     en: "Live kernel read · no network calls"),
                   systemImage: "info.circle")
@@ -54,6 +55,34 @@ struct SensorsView: View {
                 SensorsMonitor.uptimeString(s.uptime), "clock")
         }
         .padding(.vertical, 4).glassCard(radius: 16)
+    }
+
+    private var bluetoothCard: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(s.bluetooth.enumerated()), id: \.element.id) { idx, dev in
+                HStack(spacing: 10) {
+                    Image(systemName: dev.symbol).font(.system(size: 13)).foregroundStyle(Theme.blue).frame(width: 20)
+                    Text(dev.name).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
+                    Spacer()
+                    Image(systemName: batterySymbol(dev.percent))
+                        .font(.system(size: 12)).foregroundStyle(dev.percent <= 20 ? Theme.pink : Theme.green)
+                    Text("\(dev.percent)%").font(.system(size: 12, weight: .semibold, design: .rounded))
+                }
+                .padding(.horizontal, 14).padding(.vertical, 9)
+                if idx != s.bluetooth.count - 1 { Divider().opacity(0.12).padding(.horizontal, 12) }
+            }
+        }
+        .padding(.vertical, 4).glassCard(radius: 16)
+    }
+
+    private func batterySymbol(_ pct: Int) -> String {
+        switch pct {
+        case ..<13: return "battery.0"
+        case ..<38: return "battery.25"
+        case ..<63: return "battery.50"
+        case ..<88: return "battery.75"
+        default: return "battery.100"
+        }
     }
 
     private func row(_ name: String, _ value: String, _ symbol: String) -> some View {
