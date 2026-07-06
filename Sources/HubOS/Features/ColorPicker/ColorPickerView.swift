@@ -7,9 +7,15 @@ import AppKit
 struct ColorPickerView: View {
     @Bindable private var picker = ColorPickerManager.shared
 
-    @State private var composed = Color(.sRGB, red: 0.42, green: 0.36, blue: 0.98)
+    // Inline HSB selector state (a web-style square + hue slider).
+    @State private var hue = 0.72
+    @State private var sat = 0.62
+    @State private var bri = 0.98
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 6)
+
+    private var composedColor: Color { Color(hue: hue, saturation: sat, brightness: bri) }
+    private var composedHex: String { ColorPickerManager.hex(from: NSColor(composedColor)) }
 
     var body: some View {
         VStack(spacing: 14) {
@@ -38,32 +44,89 @@ struct ColorPickerView: View {
         .buttonStyle(.glassProminent).tint(Theme.pink).controlSize(.large)
     }
 
-    /// A free colour selector (native wheel / sliders / palettes) plus a button
-    /// to save the composed colour into the history.
+    /// An inline web-style colour selector: a saturation/brightness square, a hue
+    /// slider, a live HEX/RGB readout, and a button to save the composed colour.
     private var composeCard: some View {
-        HStack(spacing: 12) {
-            ColorPicker("", selection: $composed, supportsOpacity: false)
-                .labelsHidden()
-                .scaleEffect(1.25)
-                .frame(width: 40)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(L(fr: "Composer une couleur", en: "Compose a color"))
-                    .font(.system(size: 12.5, weight: .semibold))
-                Text(ColorPickerManager.hex(from: NSColor(composed)))
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer(minLength: 0)
-            Button { picker.addComposed(composed) } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "plus")
-                    Text(L(fr: "Ajouter", en: "Add"))
+        VStack(spacing: 10) {
+            svSquare
+            hueSlider
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(composedColor)
+                    .frame(width: 34, height: 34)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .strokeBorder(.white.opacity(0.15), lineWidth: 1)
+                    }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(composedHex)
+                        .font(.system(size: 12.5, weight: .semibold, design: .monospaced))
+                    let (r, g, b) = ColorPickerManager.rgb(composedHex)
+                    Text("rgb(\(r), \(g), \(b))")
+                        .font(.system(size: 9.5, design: .monospaced)).foregroundStyle(.secondary)
                 }
-                .font(.system(size: 11, weight: .semibold))
+                Spacer(minLength: 0)
+                Button { picker.addComposed(composedColor) } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "plus")
+                        Text(L(fr: "Ajouter", en: "Add"))
+                    }
+                    .font(.system(size: 11, weight: .semibold))
+                }
+                .buttonStyle(.glassProminent).controlSize(.small).tint(Theme.pink)
             }
-            .buttonStyle(.glass).controlSize(.small).tint(Theme.pink)
         }
         .padding(12).glassCard(radius: 16)
+    }
+
+    /// Saturation (x) × brightness (y) field for the current hue.
+    private var svSquare: some View {
+        GeometryReader { geo in
+            let w = geo.size.width, h = geo.size.height
+            ZStack(alignment: .topLeading) {
+                Color(hue: hue, saturation: 1, brightness: 1)
+                LinearGradient(colors: [.white, .white.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                LinearGradient(colors: [.black.opacity(0), .black], startPoint: .top, endPoint: .bottom)
+                Circle()
+                    .strokeBorder(.white, lineWidth: 2)
+                    .background(Circle().fill(composedColor))
+                    .frame(width: 16, height: 16)
+                    .shadow(color: .black.opacity(0.3), radius: 2)
+                    .offset(x: CGFloat(sat) * w - 8, y: (1 - CGFloat(bri)) * h - 8)
+            }
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance: 0).onChanged { v in
+                sat = Double(v.location.x / w).clamped(to: 0...1)
+                bri = Double(1 - v.location.y / h).clamped(to: 0...1)
+            })
+        }
+        .frame(height: 130)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    /// Full-spectrum hue slider.
+    private var hueSlider: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            ZStack(alignment: .leading) {
+                LinearGradient(
+                    colors: stride(from: 0.0, through: 1.0, by: 1.0 / 6)
+                        .map { Color(hue: $0, saturation: 1, brightness: 1) },
+                    startPoint: .leading, endPoint: .trailing)
+                Capsule()
+                    .strokeBorder(.white, lineWidth: 2)
+                    .background(Capsule().fill(Color(hue: hue, saturation: 1, brightness: 1)))
+                    .frame(width: 14, height: 22)
+                    .shadow(color: .black.opacity(0.3), radius: 2)
+                    .offset(x: (CGFloat(hue) * w - 7).clamped(to: 0...(w - 14)))
+            }
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance: 0).onChanged { v in
+                hue = Double(v.location.x / w).clamped(to: 0...1)
+            })
+        }
+        .frame(height: 18)
+        .clipShape(Capsule())
     }
 
     private func latestCard(_ s: ColorPickerManager.Swatch) -> some View {
