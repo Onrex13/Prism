@@ -62,8 +62,8 @@ final class CleanerScanner {
     func clean() async {
         phase = .cleaning
         let targets = categories.filter { $0.selected && $0.size > 0 }.flatMap { $0.paths }
-        let freed = await Task.detached { Self.removeContents(of: targets) }.value
-        lastFreed = freed
+        let outcome = await Task.detached { Self.removeContents(of: targets) }.value
+        lastFreed = outcome.freed
         // Re-measure so the UI reflects what remains.
         var result = categories
         for i in result.indices {
@@ -73,9 +73,15 @@ final class CleanerScanner {
         }
         categories = result
         phase = .done
-        let freedText = ByteCountFormatter.string(fromByteCount: freed, countStyle: .file)
-        Notifier.shared.success(L(fr: "Nettoyage terminé · \(freedText) libérés",
-                                  en: "Cleanup complete · \(freedText) freed"))
+        let freedText = ByteCountFormatter.string(fromByteCount: outcome.freed, countStyle: .file)
+        if outcome.failed > 0 {
+            Notifier.shared.error(L(fr: "Nettoyage · \(freedText) libérés, \(outcome.failed) éléments ignorés",
+                                    en: "Cleanup · \(freedText) freed, \(outcome.failed) items skipped"),
+                                  detail: "\(outcome.failed) items could not be removed (locked / in use / permission)")
+        } else {
+            Notifier.shared.success(L(fr: "Nettoyage terminé · \(freedText) libérés",
+                                      en: "Cleanup complete · \(freedText) freed"))
+        }
     }
 
     func reset() { phase = .idle; categories = []; lastFreed = 0 }
@@ -111,12 +117,25 @@ final class CleanerScanner {
                             symbol: "trash.fill", tint: Theme.pink,
                             paths: [home.appendingPathComponent(".Trash")])
         ]
-        let derived = home.appendingPathComponent("Library/Developer/Xcode/DerivedData")
-        if FileManager.default.fileExists(atPath: derived.path) {
-            cats.append(CleanerCategory(id: "derived", name: "Xcode DerivedData",
-                                        detail: L(fr: "Données de build", en: "Build data"), symbol: "hammer.fill", tint: Theme.amber,
-                                        paths: [derived]))
+        // Dev caches — added only if present, and OUTSIDE ~/Library/Caches so they
+        // never double-count the broad "App caches" category above.
+        let fm = FileManager.default
+        func addIfExists(_ id: String, _ name: String, _ detail: String, _ symbol: String, _ tint: Color, _ rel: String) {
+            let url = home.appendingPathComponent(rel)
+            if fm.fileExists(atPath: url.path) {
+                cats.append(CleanerCategory(id: id, name: name, detail: detail, symbol: symbol, tint: tint, paths: [url]))
+            }
         }
+        addIfExists("derived", "Xcode DerivedData", L(fr: "Données de build", en: "Build data"),
+                    "hammer.fill", Theme.amber, "Library/Developer/Xcode/DerivedData")
+        addIfExists("devicesupport", "Xcode DeviceSupport", L(fr: "Symboles d'appareils", en: "Device symbols"),
+                    "iphone", Theme.blue, "Library/Developer/Xcode/iOS DeviceSupport")
+        addIfExists("simulator", L(fr: "Caches Simulateur", en: "Simulator caches"), "CoreSimulator",
+                    "apps.iphone", Theme.violet, "Library/Developer/CoreSimulator/Caches")
+        addIfExists("npm", "npm", "~/.npm", "shippingbox", Theme.pink, ".npm")
+        addIfExists("yarn", "Yarn", "~/.yarn/berry/cache", "shippingbox", Theme.teal, ".yarn/berry/cache")
+        addIfExists("pnpm", "pnpm", "~/Library/pnpm/store", "shippingbox", Theme.amber, "Library/pnpm/store")
+        addIfExists("gradle", "Gradle", "~/.gradle/caches", "hammer", Theme.green, ".gradle/caches")
         return cats
     }
 
@@ -139,20 +158,20 @@ final class CleanerScanner {
         return total
     }
 
-    nonisolated private static func removeContents(of paths: [URL]) -> Int64 {
+    nonisolated private static func removeContents(of paths: [URL]) -> (freed: Int64, failed: Int) {
         var freed: Int64 = 0
+        var failed = 0
         let fm = FileManager.default
         for dir in paths {
             guard let children = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil,
                                                              options: [.skipsHiddenFiles]) else { continue }
             for child in children {
                 let size = totalSize(of: [child]) + fileSize(child)
-                if (try? fm.removeItem(at: child)) != nil {
-                    freed += size
-                }
+                do { try fm.removeItem(at: child); freed += size }
+                catch { failed += 1 }   // locked / permission / in-use — reported, not swallowed
             }
         }
-        return freed
+        return (freed, failed)
     }
 
     nonisolated private static func fileSize(_ url: URL) -> Int64 {
