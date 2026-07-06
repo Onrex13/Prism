@@ -41,6 +41,8 @@ struct ModuleDetailView: View {
             SwitchesView()
         case .sensors:
             SensorsView()
+        case .windowsnap:
+            WindowSnapView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }

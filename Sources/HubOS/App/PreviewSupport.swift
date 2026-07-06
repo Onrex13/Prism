@@ -197,6 +197,8 @@ struct PreviewHost: View {
         case "sensors":
             SensorsMonitor.shared.seedPreview()
             hub.openModule = .sensors
+        case "windowsnap":
+            hub.openModule = .windowsnap
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner

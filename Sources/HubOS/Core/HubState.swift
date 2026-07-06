@@ -62,6 +62,8 @@ final class HubState {
             BreakReminderManager.shared.setActive(enabled)
         case .desktop:
             DesktopManager.shared.setHidden(enabled)
+        case .windowsnap:
+            WindowSnapManager.shared.setActive(enabled)
         default:
             break
         }

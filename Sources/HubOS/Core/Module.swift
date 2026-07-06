@@ -19,6 +19,7 @@ enum ModuleID: String, CaseIterable, Identifiable, Codable {
     case calculator
     case switches
     case sensors
+    case windowsnap
 
     var id: String { rawValue }
 }
@@ -55,6 +56,7 @@ struct ModuleInfo: Identifiable {
         case .calculator: return L(fr: "Calculatrice", en: "Calculator")
         case .switches: return L(fr: "Interrupteurs", en: "Switches")
         case .sensors: return L(fr: "Capteurs", en: "Sensors")
+        case .windowsnap: return L(fr: "Fenêtres", en: "Windows")
         }
     }
 
@@ -77,6 +79,7 @@ struct ModuleInfo: Identifiable {
         case .calculator: return L(fr: "Calculs & pourcentages", en: "Math & percentages")
         case .switches: return L(fr: "Actions système rapides", en: "Quick system actions")
         case .sensors: return L(fr: "CPU · RAM · charge", en: "CPU · RAM · load")
+        case .windowsnap: return L(fr: "Snapping de fenêtres", en: "Window snapping")
         }
     }
 
@@ -97,7 +100,8 @@ struct ModuleInfo: Identifiable {
         ModuleInfo(id: .desktop, symbol: "macwindow.on.rectangle", tint: Theme.indigo, available: true),
         ModuleInfo(id: .calculator, symbol: "plusminus", tint: Theme.teal, available: true, hasToggle: false),
         ModuleInfo(id: .switches, symbol: "switch.2", tint: Theme.indigo, available: true, hasToggle: false),
-        ModuleInfo(id: .sensors, symbol: "cpu", tint: Theme.pink, available: true, hasToggle: false)
+        ModuleInfo(id: .sensors, symbol: "cpu", tint: Theme.pink, available: true, hasToggle: false),
+        ModuleInfo(id: .windowsnap, symbol: "rectangle.split.2x1", tint: Theme.indigo, available: true)
     ]
 
     static func info(for id: ModuleID) -> ModuleInfo {
