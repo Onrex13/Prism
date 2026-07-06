@@ -181,6 +181,9 @@ struct PreviewHost: View {
         case "colorpicker":
             ColorPickerManager.shared.seedPreview()
             hub.openModule = .colorpicker
+        case "network":
+            NetworkMonitor.shared.seedPreview()
+            hub.openModule = .network
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner

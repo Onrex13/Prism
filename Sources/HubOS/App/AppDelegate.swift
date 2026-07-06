@@ -79,6 +79,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 NSApp.terminate(nil)
             }
+        } else if ProcessInfo.processInfo.environment["HUBOS_SELFTEST"] == "network" {
+            NSApp.setActivationPolicy(.accessory)
+            setbuf(stdout, nil)
+            let (name, ip) = NetworkMonitor.primaryInterface()
+            print("SELFTEST network interface=\(name) ip=\(ip)")
+            let a = NetworkMonitor.counters()
+            print("SELFTEST network counters#1 rx=\(a.rx) tx=\(a.tx)")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                let b = NetworkMonitor.counters()
+                print("SELFTEST network counters#2 rx=\(b.rx) tx=\(b.tx)")
+                print("SELFTEST network rate down=\(NetworkMonitor.rate(b.rx - a.rx)) up=\(NetworkMonitor.rate(b.tx - a.tx))")
+                NSApp.terminate(nil)
+            }
         } else if ProcessInfo.processInfo.environment["HUBOS_SELFTEST"] == "caffeine" {
             NSApp.setActivationPolicy(.accessory)
             setbuf(stdout, nil)

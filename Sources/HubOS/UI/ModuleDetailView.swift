@@ -29,6 +29,8 @@ struct ModuleDetailView: View {
             CleanerView()
         case .colorpicker:
             ColorPickerView()
+        case .network:
+            NetworkView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }
