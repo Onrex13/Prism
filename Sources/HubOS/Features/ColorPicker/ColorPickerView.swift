@@ -1,15 +1,20 @@
 import SwiftUI
+import AppKit
 
-/// Screen colour picker: a big eyedropper button, the last pick with its HEX/RGB
-/// (tap to copy), and a persistent swatch history.
+/// Screen colour picker: a big eyedropper button, a built-in colour selector for
+/// composing any colour, the last pick with its HEX/RGB (tap to copy), and a
+/// persistent swatch history.
 struct ColorPickerView: View {
     @Bindable private var picker = ColorPickerManager.shared
+
+    @State private var composed = Color(.sRGB, red: 0.42, green: 0.36, blue: 0.98)
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 6)
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             hero
+            composeCard
             if let latest = picker.latest {
                 latestCard(latest)
                 historySection
@@ -26,11 +31,39 @@ struct ColorPickerView: View {
         Button { picker.pick() } label: {
             HStack(spacing: 8) {
                 Image(systemName: "eyedropper.halffull")
-                Text(L(fr: "Choisir une couleur", en: "Pick a color"))
+                Text(L(fr: "Pipette écran", en: "Screen eyedropper"))
             }
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.glassProminent).tint(Theme.pink).controlSize(.large)
+    }
+
+    /// A free colour selector (native wheel / sliders / palettes) plus a button
+    /// to save the composed colour into the history.
+    private var composeCard: some View {
+        HStack(spacing: 12) {
+            ColorPicker("", selection: $composed, supportsOpacity: false)
+                .labelsHidden()
+                .scaleEffect(1.25)
+                .frame(width: 40)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(L(fr: "Composer une couleur", en: "Compose a color"))
+                    .font(.system(size: 12.5, weight: .semibold))
+                Text(ColorPickerManager.hex(from: NSColor(composed)))
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+            Button { picker.addComposed(composed) } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "plus")
+                    Text(L(fr: "Ajouter", en: "Add"))
+                }
+                .font(.system(size: 11, weight: .semibold))
+            }
+            .buttonStyle(.glass).controlSize(.small).tint(Theme.pink)
+        }
+        .padding(12).glassCard(radius: 16)
     }
 
     private func latestCard(_ s: ColorPickerManager.Swatch) -> some View {

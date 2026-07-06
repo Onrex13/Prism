@@ -55,6 +55,12 @@ final class ColorPickerManager {
         if let latest { copy(latest) }               // auto-copy the fresh pick
     }
 
+    /// Saves a colour composed in the built-in colour selector (wheel/sliders)
+    /// to the history, exactly like a screen pick.
+    func addComposed(_ color: Color) {
+        ingest(Self.hex(from: NSColor(color)))
+    }
+
     // MARK: Actions
 
     /// Copies a swatch to the clipboard as HEX (default) or `rgb(…)`.
