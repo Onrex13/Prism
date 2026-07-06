@@ -194,6 +194,9 @@ struct PreviewHost: View {
             hub.openModule = .calculator
         case "switches":
             hub.openModule = .switches
+        case "sensors":
+            SensorsMonitor.shared.seedPreview()
+            hub.openModule = .sensors
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner

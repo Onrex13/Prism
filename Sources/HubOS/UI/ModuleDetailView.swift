@@ -39,6 +39,8 @@ struct ModuleDetailView: View {
             CalcView()
         case .switches:
             SwitchesView()
+        case .sensors:
+            SensorsView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }

@@ -79,6 +79,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 NSApp.terminate(nil)
             }
+        } else if ProcessInfo.processInfo.environment["HUBOS_SELFTEST"] == "sensors" {
+            NSApp.setActivationPolicy(.accessory)
+            setbuf(stdout, nil)
+            let s = SensorsMonitor.shared
+            s.start()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
+                print(String(format: "SELFTEST sensors cpu=%.0f%% ram=%.0f%% load=%.2f/%.2f/%.2f uptime=%@",
+                             s.cpu * 100, s.ramFraction * 100, s.load.0, s.load.1, s.load.2,
+                             SensorsMonitor.uptimeString(s.uptime)))
+                NSApp.terminate(nil)
+            }
         } else if ProcessInfo.processInfo.environment["HUBOS_SELFTEST"] == "network" {
             NSApp.setActivationPolicy(.accessory)
             setbuf(stdout, nil)
