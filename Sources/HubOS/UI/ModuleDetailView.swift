@@ -35,6 +35,8 @@ struct ModuleDetailView: View {
             BreakReminderView()
         case .desktop:
             DesktopView()
+        case .calculator:
+            CalcView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }

@@ -189,6 +189,9 @@ struct PreviewHost: View {
             hub.openModule = .breakreminder
         case "desktop":
             hub.openModule = .desktop
+        case "calculator":
+            CalcManager.shared.seedPreview()
+            hub.openModule = .calculator
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner

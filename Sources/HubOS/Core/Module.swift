@@ -16,6 +16,7 @@ enum ModuleID: String, CaseIterable, Identifiable, Codable {
     case network
     case breakreminder
     case desktop
+    case calculator
 
     var id: String { rawValue }
 }
@@ -49,6 +50,7 @@ struct ModuleInfo: Identifiable {
         case .network: return L(fr: "Réseau", en: "Network")
         case .breakreminder: return L(fr: "Pauses", en: "Breaks")
         case .desktop: return L(fr: "Bureau épuré", en: "Clean Desktop")
+        case .calculator: return L(fr: "Calculatrice", en: "Calculator")
         }
     }
 
@@ -68,6 +70,7 @@ struct ModuleInfo: Identifiable {
         case .network: return L(fr: "Débit & IP locale", en: "Throughput & local IP")
         case .breakreminder: return L(fr: "Rappels de pause réguliers", en: "Regular break reminders")
         case .desktop: return L(fr: "Masquer les icônes du bureau", en: "Hide desktop icons")
+        case .calculator: return L(fr: "Calculs & pourcentages", en: "Math & percentages")
         }
     }
 
@@ -85,7 +88,8 @@ struct ModuleInfo: Identifiable {
         ModuleInfo(id: .colorpicker, symbol: "eyedropper.halffull", tint: Theme.pink, available: true, hasToggle: false),
         ModuleInfo(id: .network, symbol: "arrow.up.arrow.down", tint: Theme.blue, available: true, hasToggle: false),
         ModuleInfo(id: .breakreminder, symbol: "figure.walk", tint: Theme.teal, available: true),
-        ModuleInfo(id: .desktop, symbol: "macwindow.on.rectangle", tint: Theme.indigo, available: true)
+        ModuleInfo(id: .desktop, symbol: "macwindow.on.rectangle", tint: Theme.indigo, available: true),
+        ModuleInfo(id: .calculator, symbol: "plusminus", tint: Theme.teal, available: true, hasToggle: false)
     ]
 
     static func info(for id: ModuleID) -> ModuleInfo {
