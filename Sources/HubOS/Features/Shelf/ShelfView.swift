@@ -27,11 +27,10 @@ struct ShelfView: View {
                 .padding(.trailing, 18)
                 .offset(x: open ? 0 : 340)
                 .opacity(open ? 1 : 0)
-
-            tab
-                .opacity(open ? 0 : 1)
-                .offset(x: -4)
         }
+        // No persistent edge handle: the shelf stays fully hidden and slides out
+        // only when the pointer reaches the right edge (see ShelfController's
+        // hover monitor) or a drag approaches.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
         .animation(.spring(response: 0.42, dampingFraction: 0.82), value: open)
         // Accept drops even over the collapsed tab so a drag reveals the shelf.
@@ -40,30 +39,6 @@ struct ShelfView: View {
             // Keep the shelf open ~2s after the drop instead of snapping shut.
             if handled { ShelfController.shared.holdOpen() }
             return handled
-        }
-    }
-
-    // MARK: Tab
-
-    private var tab: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "tray.full.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-            if !store.isEmpty {
-                Text("\(store.items.count)")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(4)
-                    .background(Circle().fill(Theme.teal))
-            }
-        }
-        .frame(width: 30, height: 92)
-        .background {
-            UnevenRoundedRectangle(topLeadingRadius: 14, bottomLeadingRadius: 14,
-                                   bottomTrailingRadius: 0, topTrailingRadius: 0, style: .continuous)
-                .fill(Theme.teal.opacity(0.9))
-                .shadow(color: .black.opacity(0.3), radius: 8, x: -2)
         }
     }
 
