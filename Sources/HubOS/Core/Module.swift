@@ -14,6 +14,8 @@ enum ModuleID: String, CaseIterable, Identifiable, Codable {
     case cleaner
     case colorpicker
     case network
+    case breakreminder
+    case desktop
 
     var id: String { rawValue }
 }
@@ -45,6 +47,8 @@ struct ModuleInfo: Identifiable {
         case .cleaner: return "Cleaner"
         case .colorpicker: return L(fr: "Pipette", en: "Color Picker")
         case .network: return L(fr: "Réseau", en: "Network")
+        case .breakreminder: return L(fr: "Pauses", en: "Breaks")
+        case .desktop: return L(fr: "Bureau épuré", en: "Clean Desktop")
         }
     }
 
@@ -62,6 +66,8 @@ struct ModuleInfo: Identifiable {
         case .cleaner: return L(fr: "Nettoyage · mémoire · sécurité", en: "Cleanup · memory · security")
         case .colorpicker: return L(fr: "Pipette écran & historique", en: "Screen eyedropper & history")
         case .network: return L(fr: "Débit & IP locale", en: "Throughput & local IP")
+        case .breakreminder: return L(fr: "Rappels de pause réguliers", en: "Regular break reminders")
+        case .desktop: return L(fr: "Masquer les icônes du bureau", en: "Hide desktop icons")
         }
     }
 
@@ -77,7 +83,9 @@ struct ModuleInfo: Identifiable {
         ModuleInfo(id: .battery, symbol: "battery.100.bolt", tint: Theme.blue, available: true, hasToggle: false),
         ModuleInfo(id: .cleaner, symbol: "sparkles", tint: Theme.green, available: true, hasToggle: false),
         ModuleInfo(id: .colorpicker, symbol: "eyedropper.halffull", tint: Theme.pink, available: true, hasToggle: false),
-        ModuleInfo(id: .network, symbol: "arrow.up.arrow.down", tint: Theme.blue, available: true, hasToggle: false)
+        ModuleInfo(id: .network, symbol: "arrow.up.arrow.down", tint: Theme.blue, available: true, hasToggle: false),
+        ModuleInfo(id: .breakreminder, symbol: "figure.walk", tint: Theme.teal, available: true),
+        ModuleInfo(id: .desktop, symbol: "macwindow.on.rectangle", tint: Theme.indigo, available: true)
     ]
 
     static func info(for id: ModuleID) -> ModuleInfo {

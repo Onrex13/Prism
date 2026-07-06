@@ -184,6 +184,11 @@ struct PreviewHost: View {
         case "network":
             NetworkMonitor.shared.seedPreview()
             hub.openModule = .network
+        case "breakreminder":
+            hub.setEnabled(.breakreminder, true)
+            hub.openModule = .breakreminder
+        case "desktop":
+            hub.openModule = .desktop
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner

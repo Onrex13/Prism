@@ -31,6 +31,10 @@ struct ModuleDetailView: View {
             ColorPickerView()
         case .network:
             NetworkView()
+        case .breakreminder:
+            BreakReminderView()
+        case .desktop:
+            DesktopView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }

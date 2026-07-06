@@ -58,6 +58,10 @@ final class HubState {
             enabled ? ShelfController.shared.enable() : ShelfController.shared.disable()
         case .caffeine:
             CaffeineManager.shared.setActive(enabled)
+        case .breakreminder:
+            BreakReminderManager.shared.setActive(enabled)
+        case .desktop:
+            DesktopManager.shared.setHidden(enabled)
         default:
             break
         }
