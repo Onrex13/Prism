@@ -5,8 +5,7 @@ import Foundation
 enum AppInfo {
     static let name = "Prism"
 
-    /// ⚠️ Set this to your GitHub username before publishing (repo must be public).
-    static let githubOwner = "CHANGE_ME"
+    static let githubOwner = "Onrex13"
     static let githubRepo = "Prism"
 
     /// Marketing version from the bundle (falls back for dev/`swift run`).
