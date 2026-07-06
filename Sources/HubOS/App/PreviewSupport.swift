@@ -178,6 +178,9 @@ struct PreviewHost: View {
         case "settings":
             UpdateManager.shared.reset()
             hub.showingSettings = true
+        case "colorpicker":
+            ColorPickerManager.shared.seedPreview()
+            hub.openModule = .colorpicker
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner

@@ -27,6 +27,8 @@ struct ModuleDetailView: View {
             TimerView()
         case .cleaner:
             CleanerView()
+        case .colorpicker:
+            ColorPickerView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }

@@ -12,6 +12,7 @@ enum ModuleID: String, CaseIterable, Identifiable, Codable {
     case audio
     case battery
     case cleaner
+    case colorpicker
 
     var id: String { rawValue }
 }
@@ -41,6 +42,7 @@ struct ModuleInfo: Identifiable {
         case .audio: return "Audio"
         case .battery: return L(fr: "Batterie", en: "Battery")
         case .cleaner: return "Cleaner"
+        case .colorpicker: return L(fr: "Pipette", en: "Color Picker")
         }
     }
 
@@ -56,6 +58,7 @@ struct ModuleInfo: Identifiable {
         case .audio: return L(fr: "Sortie, entrée & volume", en: "Output, input & volume")
         case .battery: return L(fr: "Santé, cycles & énergie", en: "Health, cycles & power")
         case .cleaner: return L(fr: "Nettoyage · mémoire · sécurité", en: "Cleanup · memory · security")
+        case .colorpicker: return L(fr: "Pipette écran & historique", en: "Screen eyedropper & history")
         }
     }
 
@@ -69,7 +72,8 @@ struct ModuleInfo: Identifiable {
         ModuleInfo(id: .timer, symbol: "timer", tint: Theme.amber, available: true, hasToggle: false),
         ModuleInfo(id: .audio, symbol: "hifispeaker.and.homepod.fill", tint: Theme.teal, available: true, hasToggle: false),
         ModuleInfo(id: .battery, symbol: "battery.100.bolt", tint: Theme.blue, available: true, hasToggle: false),
-        ModuleInfo(id: .cleaner, symbol: "sparkles", tint: Theme.green, available: true, hasToggle: false)
+        ModuleInfo(id: .cleaner, symbol: "sparkles", tint: Theme.green, available: true, hasToggle: false),
+        ModuleInfo(id: .colorpicker, symbol: "eyedropper.halffull", tint: Theme.pink, available: true, hasToggle: false)
     ]
 
     static func info(for id: ModuleID) -> ModuleInfo {
