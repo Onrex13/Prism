@@ -37,6 +37,8 @@ struct ModuleDetailView: View {
             DesktopView()
         case .calculator:
             CalcView()
+        case .switches:
+            SwitchesView()
         default:
             ComingSoonDetail(info: ModuleInfo.info(for: id))
         }

@@ -17,6 +17,7 @@ enum ModuleID: String, CaseIterable, Identifiable, Codable {
     case breakreminder
     case desktop
     case calculator
+    case switches
 
     var id: String { rawValue }
 }
@@ -51,6 +52,7 @@ struct ModuleInfo: Identifiable {
         case .breakreminder: return L(fr: "Pauses", en: "Breaks")
         case .desktop: return L(fr: "Bureau épuré", en: "Clean Desktop")
         case .calculator: return L(fr: "Calculatrice", en: "Calculator")
+        case .switches: return L(fr: "Interrupteurs", en: "Switches")
         }
     }
 
@@ -71,6 +73,7 @@ struct ModuleInfo: Identifiable {
         case .breakreminder: return L(fr: "Rappels de pause réguliers", en: "Regular break reminders")
         case .desktop: return L(fr: "Masquer les icônes du bureau", en: "Hide desktop icons")
         case .calculator: return L(fr: "Calculs & pourcentages", en: "Math & percentages")
+        case .switches: return L(fr: "Actions système rapides", en: "Quick system actions")
         }
     }
 
@@ -89,7 +92,8 @@ struct ModuleInfo: Identifiable {
         ModuleInfo(id: .network, symbol: "arrow.up.arrow.down", tint: Theme.blue, available: true, hasToggle: false),
         ModuleInfo(id: .breakreminder, symbol: "figure.walk", tint: Theme.teal, available: true),
         ModuleInfo(id: .desktop, symbol: "macwindow.on.rectangle", tint: Theme.indigo, available: true),
-        ModuleInfo(id: .calculator, symbol: "plusminus", tint: Theme.teal, available: true, hasToggle: false)
+        ModuleInfo(id: .calculator, symbol: "plusminus", tint: Theme.teal, available: true, hasToggle: false),
+        ModuleInfo(id: .switches, symbol: "switch.2", tint: Theme.indigo, available: true, hasToggle: false)
     ]
 
     static func info(for id: ModuleID) -> ModuleInfo {

@@ -192,6 +192,8 @@ struct PreviewHost: View {
         case "calculator":
             CalcManager.shared.seedPreview()
             hub.openModule = .calculator
+        case "switches":
+            hub.openModule = .switches
         case "cleaner":
             CleanerScanner.shared.seedPreview()
             hub.openModule = .cleaner
