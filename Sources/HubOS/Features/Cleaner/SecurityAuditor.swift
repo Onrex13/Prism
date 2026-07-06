@@ -59,7 +59,7 @@ final class SecurityAuditor {
         phase = .scanning
         findings = []
         let dirs = Self.scanDirs()
-        let result = await Task.detached { Self.audit(dirs) }.value
+        let result = await Task.detached { Self.audit(dirs) + Self.scanExtensions() }.value
         findings = result.sorted { ($0.severity, $0.name) < ($1.severity, $1.name) }
         phase = .done
     }
@@ -157,6 +157,62 @@ final class SecurityAuditor {
             }
         }
         return out
+    }
+
+    // MARK: Browser extensions (a common adware vector)
+
+    nonisolated private static func scanExtensions() -> [Finding] {
+        let fm = FileManager.default
+        let home = fm.homeDirectoryForCurrentUser
+        let browsers: [(name: String, path: String)] = [
+            ("Chrome", "Library/Application Support/Google/Chrome"),
+            ("Brave", "Library/Application Support/BraveSoftware/Brave-Browser"),
+            ("Edge", "Library/Application Support/Microsoft Edge"),
+            ("Chromium", "Library/Application Support/Chromium")
+        ]
+        var out: [Finding] = []
+        for browser in browsers {
+            let root = home.appendingPathComponent(browser.path)
+            guard let profiles = try? fm.contentsOfDirectory(at: root, includingPropertiesForKeys: nil,
+                                                             options: [.skipsHiddenFiles]) else { continue }
+            for profile in profiles where profile.hasDirectoryPath {
+                let extRoot = profile.appendingPathComponent("Extensions")
+                guard let extIDs = try? fm.contentsOfDirectory(at: extRoot, includingPropertiesForKeys: nil,
+                                                               options: [.skipsHiddenFiles]) else { continue }
+                for extDir in extIDs where extDir.hasDirectoryPath {
+                    let id = extDir.lastPathComponent
+                    guard let versions = try? fm.contentsOfDirectory(at: extDir, includingPropertiesForKeys: nil,
+                                                                     options: [.skipsHiddenFiles]),
+                          let versionDir = versions.first(where: { $0.hasDirectoryPath }) else { continue }
+                    let manifest = versionDir.appendingPathComponent("manifest.json")
+                    let name = extensionName(manifest: manifest, versionDir: versionDir) ?? id
+                    let haystack = (name + " " + id).lowercased()
+                    let isAdware = adwareSignatures.contains { haystack.contains($0) }
+                    out.append(Finding(
+                        id: manifest.path, name: name, plistPath: versionDir.path,
+                        program: nil, scope: "Extension \(browser.name)",
+                        severity: isAdware ? .adware : .ok, signer: nil, userWritable: false))
+                }
+            }
+        }
+        return out
+    }
+
+    nonisolated private static func extensionName(manifest: URL, versionDir: URL) -> String? {
+        guard let data = try? Data(contentsOf: manifest),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              var name = json["name"] as? String, !name.isEmpty else { return nil }
+        if name.hasPrefix("__MSG_") {
+            let key = name.replacingOccurrences(of: "__MSG_", with: "").replacingOccurrences(of: "__", with: "")
+            let locale = (json["default_locale"] as? String) ?? "en"
+            let messages = versionDir.appendingPathComponent("_locales/\(locale)/messages.json")
+            guard let mdata = try? Data(contentsOf: messages),
+                  let mjson = try? JSONSerialization.jsonObject(with: mdata) as? [String: Any],
+                  let entry = mjson[key] as? [String: Any],
+                  let msg = entry["message"] as? String else { return nil }
+            name = msg
+        }
+        return name
     }
 
     nonisolated private static func resolveProgram(_ dict: NSDictionary?) -> String? {

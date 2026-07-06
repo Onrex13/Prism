@@ -70,7 +70,7 @@ struct CleanerView: View {
 
 private struct CleanTab: View {
     @Bindable private var scanner = CleanerScanner.shared
-    @State private var confirming = false
+    @State private var showRecap = false
 
     var body: some View {
         VStack(spacing: 14) {
@@ -83,6 +83,8 @@ private struct CleanTab: View {
             }
         }
         .animation(.smooth(duration: 0.3), value: scanner.phase)
+        .overlay { if showRecap { recapOverlay.transition(.opacity) } }
+        .animation(.smooth(duration: 0.2), value: showRecap)
     }
 
     private var idle: some View {
@@ -129,18 +131,62 @@ private struct CleanTab: View {
             HStack(spacing: 10) {
                 Button { scanner.reset() } label: { Image(systemName: "arrow.clockwise") }
                     .buttonStyle(.glass)
-                Button {
-                    if confirming { confirming = false; Task { await scanner.clean() } }
-                    else { withAnimation(.smooth) { confirming = true } }
-                } label: {
-                    Text(confirming ? L(fr: "Confirmer la suppression", en: "Confirm deletion")
-                         : L(fr: "Nettoyer \(CleanerView.bytes(scanner.totalSelected))",
-                             en: "Clean \(CleanerView.bytes(scanner.totalSelected))"))
+                Button { showRecap = true } label: {
+                    Text(L(fr: "Nettoyer \(CleanerView.bytes(scanner.totalSelected))",
+                           en: "Clean \(CleanerView.bytes(scanner.totalSelected))"))
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent).tint(confirming ? Theme.pink : Theme.green)
+                .buttonStyle(.glassProminent).tint(Theme.green)
                 .disabled(!scanner.hasSelection)
             }
+        }
+    }
+
+    /// A pre-delete recap: exactly which categories (and sizes) will be cleared.
+    private var recapOverlay: some View {
+        let selected = scanner.categories.filter { $0.selected && $0.size > 0 }
+        return ZStack {
+            Rectangle().fill(.black.opacity(0.5)).ignoresSafeArea()
+                .onTapGesture { showRecap = false }
+            VStack(spacing: 12) {
+                IconBadge(symbol: "trash.fill", tint: Theme.pink, size: 44)
+                Text(L(fr: "Confirmer le nettoyage", en: "Confirm cleanup")).font(.system(size: 16, weight: .bold))
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(selected) { cat in
+                            HStack(spacing: 8) {
+                                Image(systemName: cat.symbol).font(.system(size: 11)).foregroundStyle(cat.tint).frame(width: 16)
+                                Text(cat.name).font(.system(size: 12)).lineLimit(1)
+                                Spacer(minLength: 6)
+                                Text(CleanerView.bytes(cat.size))
+                                    .font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.secondary)
+                            }
+                            .padding(.horizontal, 12).padding(.vertical, 7)
+                            if cat.id != selected.last?.id { Divider().opacity(0.1).padding(.horizontal, 12) }
+                        }
+                    }
+                }
+                .frame(maxHeight: 180)
+                .background(RoundedRectangle(cornerRadius: 12).fill(.white.opacity(0.05)))
+                HStack {
+                    Text(L(fr: "Total", en: "Total")).font(.system(size: 12, weight: .semibold))
+                    Spacer()
+                    Text(CleanerView.bytes(scanner.totalSelected))
+                        .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(Theme.green)
+                }.padding(.horizontal, 4)
+                Text(L(fr: "Le contenu de ces dossiers sera supprimé. Irréversible.",
+                       en: "The contents of these folders will be deleted. This can't be undone."))
+                    .font(.system(size: 10)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                HStack(spacing: 10) {
+                    Button { showRecap = false } label: {
+                        Text(L(fr: "Annuler", en: "Cancel")).frame(maxWidth: .infinity)
+                    }.buttonStyle(.glass).controlSize(.large)
+                    Button { showRecap = false; Task { await scanner.clean() } } label: {
+                        Text(L(fr: "Supprimer", en: "Delete")).frame(maxWidth: .infinity)
+                    }.buttonStyle(.glassProminent).tint(Theme.pink).controlSize(.large)
+                }
+            }
+            .padding(18).frame(width: 300).glassCard(radius: 22)
         }
     }
 
