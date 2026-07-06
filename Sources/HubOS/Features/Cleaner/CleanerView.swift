@@ -6,7 +6,11 @@ struct CleanerView: View {
     enum Tab: String, CaseIterable, Identifiable {
         case clean, memory, security
         var id: String { rawValue }
-        var title: String { self == .clean ? "Nettoyage" : self == .memory ? "Mémoire" : "Sécurité" }
+        @MainActor var title: String {
+            self == .clean ? L(fr: "Nettoyage", en: "Cleanup")
+                : self == .memory ? L(fr: "Mémoire", en: "Memory")
+                : L(fr: "Sécurité", en: "Security")
+        }
         var symbol: String { self == .clean ? "sparkles" : self == .memory ? "memorychip.fill" : "checkmark.shield.fill" }
         var tint: Color { self == .clean ? Theme.green : self == .memory ? Theme.teal : Theme.indigo }
     }
@@ -72,9 +76,9 @@ private struct CleanTab: View {
         VStack(spacing: 14) {
             switch scanner.phase {
             case .idle:     idle
-            case .scanning: busy("Analyse en cours…")
+            case .scanning: busy(L(fr: "Analyse en cours…", en: "Scanning…"))
             case .ready:    results
-            case .cleaning: busy("Nettoyage…")
+            case .cleaning: busy(L(fr: "Nettoyage…", en: "Cleaning…"))
             case .done:     done
             }
         }
@@ -84,11 +88,12 @@ private struct CleanTab: View {
     private var idle: some View {
         VStack(spacing: 14) {
             IconBadge(symbol: "sparkles", tint: Theme.green, size: 64).padding(.top, 8)
-            Text("Nettoyer mon Mac").font(.system(size: 17, weight: .bold))
-            Text("Analyse les caches, journaux, la corbeille et les données de build récupérables.")
+            Text(L(fr: "Nettoyer mon Mac", en: "Clean my Mac")).font(.system(size: 17, weight: .bold))
+            Text(L(fr: "Analyse les caches, journaux, la corbeille et les données de build récupérables.",
+                   en: "Scans reclaimable caches, logs, trash and build data."))
                 .font(.system(size: 11)).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Button { Task { await scanner.scan() } } label: {
-                Text("Analyser").frame(maxWidth: .infinity)
+                Text(L(fr: "Analyser", en: "Scan")).frame(maxWidth: .infinity)
             }
             .buttonStyle(.glassProminent).tint(Theme.green).controlSize(.large).padding(.top, 4)
         }
@@ -109,7 +114,7 @@ private struct CleanTab: View {
                 Text(CleanerView.bytes(scanner.totalSelected))
                     .font(.system(size: 30, weight: .bold, design: .rounded))
                     .foregroundStyle(Theme.green).contentTransition(.numericText())
-                Text("récupérables").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(L(fr: "récupérables", en: "reclaimable")).font(.system(size: 11)).foregroundStyle(.secondary)
             }
             VStack(spacing: 0) {
                 ForEach(scanner.categories) { cat in
@@ -128,7 +133,9 @@ private struct CleanTab: View {
                     if confirming { confirming = false; Task { await scanner.clean() } }
                     else { withAnimation(.smooth) { confirming = true } }
                 } label: {
-                    Text(confirming ? "Confirmer la suppression" : "Nettoyer \(CleanerView.bytes(scanner.totalSelected))")
+                    Text(confirming ? L(fr: "Confirmer la suppression", en: "Confirm deletion")
+                         : L(fr: "Nettoyer \(CleanerView.bytes(scanner.totalSelected))",
+                             en: "Clean \(CleanerView.bytes(scanner.totalSelected))"))
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent).tint(confirming ? Theme.pink : Theme.green)
@@ -158,10 +165,12 @@ private struct CleanTab: View {
     private var done: some View {
         VStack(spacing: 12) {
             IconBadge(symbol: "checkmark", tint: Theme.green, size: 60).padding(.top, 8)
-            Text(scanner.lastFreed > 0 ? "\(CleanerView.bytes(scanner.lastFreed)) libérés" : "Déjà propre")
+            Text(scanner.lastFreed > 0 ? L(fr: "\(CleanerView.bytes(scanner.lastFreed)) libérés",
+                                           en: "\(CleanerView.bytes(scanner.lastFreed)) freed")
+                 : L(fr: "Déjà propre", en: "Already clean"))
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-            Text("Ton Mac respire mieux ✨").font(.system(size: 11)).foregroundStyle(.secondary)
-            Button { scanner.reset() } label: { Text("Terminé").frame(maxWidth: .infinity) }
+            Text(L(fr: "Ton Mac respire mieux ✨", en: "Your Mac breathes easier ✨")).font(.system(size: 11)).foregroundStyle(.secondary)
+            Button { scanner.reset() } label: { Text(L(fr: "Terminé", en: "Done")).frame(maxWidth: .infinity) }
                 .buttonStyle(.glassProminent).tint(Theme.green).controlSize(.large).padding(.top, 4)
         }
         .padding(.bottom, 6)
@@ -186,7 +195,8 @@ private struct MemoryTab: View {
             gauge
             breakdown
             if mem.purgeAvailable { purgeButton }
-            Label("Chiffres réels du noyau · la purge est temporaire",
+            Label(L(fr: "Chiffres réels du noyau · la purge est temporaire",
+                    en: "Real kernel figures · purge is temporary"),
                   systemImage: "info.circle")
                 .font(.system(size: 10, weight: .medium)).foregroundStyle(.tertiary)
         }
@@ -207,12 +217,13 @@ private struct MemoryTab: View {
                     Text("\(Int(mem.sample.usedFraction * 100))%")
                         .font(.system(size: 30, weight: .bold, design: .rounded))
                         .contentTransition(.numericText())
-                    Text("utilisée").font(.system(size: 10)).foregroundStyle(.secondary)
+                    Text(L(fr: "utilisée", en: "used")).font(.system(size: 10)).foregroundStyle(.secondary)
                 }
             }
             .frame(width: 128, height: 128)
 
-            Text("Pression \(mem.pressure.label.lowercased())")
+            Text(L(fr: "Pression \(mem.pressure.label.lowercased())",
+                   en: "\(mem.pressure.label) pressure"))
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(pressureColor)
                 .padding(.horizontal, 10).padding(.vertical, 3)
@@ -223,13 +234,13 @@ private struct MemoryTab: View {
 
     private var breakdown: some View {
         VStack(spacing: 0) {
-            row("App", mem.sample.app, Theme.indigo)
+            row(L(fr: "App", en: "App"), mem.sample.app, Theme.indigo)
             Divider().opacity(0.12).padding(.horizontal, 12)
-            row("Câblée", mem.sample.wired, Theme.violet)
+            row(L(fr: "Câblée", en: "Wired"), mem.sample.wired, Theme.violet)
             Divider().opacity(0.12).padding(.horizontal, 12)
-            row("Compressée", mem.sample.compressed, Theme.amber)
+            row(L(fr: "Compressée", en: "Compressed"), mem.sample.compressed, Theme.amber)
             Divider().opacity(0.12).padding(.horizontal, 12)
-            row("Libre", mem.sample.free, Theme.green)
+            row(L(fr: "Libre", en: "Free"), mem.sample.free, Theme.green)
         }
         .padding(.vertical, 4).glassCard(radius: 16)
     }
@@ -250,9 +261,10 @@ private struct MemoryTab: View {
         Button { Task { await mem.purge() } } label: {
             HStack {
                 if mem.isPurging { ProgressView().controlSize(.small) }
-                Text(mem.isPurging ? "Libération…"
-                     : mem.lastFreed > 0 ? "\(CleanerView.bytes(mem.lastFreed)) libérés — relancer"
-                     : "Libérer la mémoire inactive")
+                Text(mem.isPurging ? L(fr: "Libération…", en: "Freeing…")
+                     : mem.lastFreed > 0 ? L(fr: "\(CleanerView.bytes(mem.lastFreed)) libérés — relancer",
+                                             en: "\(CleanerView.bytes(mem.lastFreed)) freed — run again")
+                     : L(fr: "Libérer la mémoire inactive", en: "Free inactive memory"))
             }
             .frame(maxWidth: .infinity)
         }
@@ -279,11 +291,12 @@ private struct SecurityTab: View {
     private var idle: some View {
         VStack(spacing: 14) {
             IconBadge(symbol: "checkmark.shield.fill", tint: Theme.indigo, size: 64).padding(.top, 8)
-            Text("Audit de sécurité").font(.system(size: 17, weight: .bold))
-            Text("Inspecte les agents de démarrage et démons : signature du code et adwares connus. Aucune modification sans ton accord.")
+            Text(L(fr: "Audit de sécurité", en: "Security audit")).font(.system(size: 17, weight: .bold))
+            Text(L(fr: "Inspecte les agents de démarrage et démons : signature du code et adwares connus. Aucune modification sans ton accord.",
+                   en: "Inspects launch agents and daemons: code signature and known adware. Nothing is changed without your consent."))
                 .font(.system(size: 11)).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Button { Task { await auditor.scan() } } label: {
-                Text("Analyser").frame(maxWidth: .infinity)
+                Text(L(fr: "Analyser", en: "Scan")).frame(maxWidth: .infinity)
             }
             .buttonStyle(.glassProminent).tint(Theme.indigo).controlSize(.large).padding(.top, 4)
         }
@@ -293,7 +306,7 @@ private struct SecurityTab: View {
     private var busy: some View {
         VStack(spacing: 14) {
             ProgressView().controlSize(.large)
-            Text("Inspection des éléments de démarrage…")
+            Text(L(fr: "Inspection des éléments de démarrage…", en: "Inspecting startup items…"))
                 .font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
         }
         .frame(height: 200)
@@ -309,7 +322,7 @@ private struct SecurityTab: View {
             }
             .frame(maxHeight: 300).scrollIndicators(.hidden)
             Button { auditor.reset() } label: {
-                Label("Nouvelle analyse", systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
+                Label(L(fr: "Nouvelle analyse", en: "New scan"), systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
             }
             .buttonStyle(.glass).controlSize(.large)
         }
@@ -318,10 +331,11 @@ private struct SecurityTab: View {
     private var summary: some View {
         let flagged = auditor.flaggedCount
         return VStack(spacing: 2) {
-            Text("\(auditor.findings.count) éléments")
+            Text(L(fr: "\(auditor.findings.count) éléments", en: "\(auditor.findings.count) items"))
                 .font(.system(size: 22, weight: .bold, design: .rounded))
-            Text(flagged == 0 ? "Aucun élément suspect ✓"
-                 : "\(flagged) à examiner\(auditor.adwareCount > 0 ? " · \(auditor.adwareCount) adware" : "")")
+            Text(flagged == 0 ? L(fr: "Aucun élément suspect ✓", en: "Nothing suspicious ✓")
+                 : L(fr: "\(flagged) à examiner\(auditor.adwareCount > 0 ? " · \(auditor.adwareCount) adware" : "")",
+                     en: "\(flagged) to review\(auditor.adwareCount > 0 ? " · \(auditor.adwareCount) adware" : "")"))
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(flagged == 0 ? Theme.green : (auditor.adwareCount > 0 ? Theme.pink : Theme.amber))
         }
@@ -331,6 +345,17 @@ private struct SecurityTab: View {
 private struct FindingRow: View {
     let finding: SecurityAuditor.Finding
     @State private var confirming = false
+
+    /// The `scope` is a stored French string set off the main actor during the
+    /// scan, so it's localized here at display time rather than at its source.
+    private func localizedScope(_ scope: String) -> String {
+        switch scope {
+        case "Agent utilisateur": return L(fr: "Agent utilisateur", en: "User agent")
+        case "Agent système":     return L(fr: "Agent système", en: "System agent")
+        case "Démon système":     return L(fr: "Démon système", en: "System daemon")
+        default:                  return scope
+        }
+    }
 
     private var color: Color {
         switch finding.severity {
@@ -347,14 +372,14 @@ private struct FindingRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(finding.name).font(.system(size: 12.5, weight: .semibold))
                     .lineLimit(1).truncationMode(.middle)
-                Text("\(finding.scope) · \(finding.severity.label)")
+                Text("\(localizedScope(finding.scope)) · \(finding.severity.label)")
                     .font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 4)
             Menu {
-                Button("Révéler dans le Finder") { SecurityAuditor.shared.reveal(finding) }
+                Button(L(fr: "Révéler dans le Finder", en: "Reveal in Finder")) { SecurityAuditor.shared.reveal(finding) }
                 if finding.userWritable && finding.severity != .ok {
-                    Button("Désactiver (quarantaine)", role: .destructive) {
+                    Button(L(fr: "Désactiver (quarantaine)", en: "Disable (quarantine)"), role: .destructive) {
                         Task { await SecurityAuditor.shared.quarantine(finding) }
                     }
                 }

@@ -73,17 +73,17 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
     }
 
     /// Short one-line title for the row.
-    var title: String {
+    @MainActor var title: String {
         switch kind {
         case .link:
             return URL(string: text)?.host ?? text
         case .color:
             return text.uppercased()
         case .image:
-            return "Image"
+            return L(fr: "Image", en: "Image")
         case .file:
             let names = (filePaths ?? []).map { ($0 as NSString).lastPathComponent }
-            return names.first ?? "Fichier"
+            return names.first ?? L(fr: "Fichier", en: "File")
         case .text:
             return text.trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: "\n", with: " ")
@@ -91,16 +91,16 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
     }
 
     /// Secondary line: source app + kind + relative age.
-    func subtitle(now: Date = Date()) -> String {
+    @MainActor func subtitle(now: Date = Date()) -> String {
         var parts: [String] = []
         switch kind {
-        case .text:  parts.append("\(text.count) caractères")
-        case .link:  parts.append("Lien")
-        case .color: parts.append("Couleur")
-        case .image: parts.append("Image")
+        case .text:  parts.append(L(fr: "\(text.count) caractères", en: "\(text.count) characters"))
+        case .link:  parts.append(L(fr: "Lien", en: "Link"))
+        case .color: parts.append(L(fr: "Couleur", en: "Color"))
+        case .image: parts.append(L(fr: "Image", en: "Image"))
         case .file:
             let n = filePaths?.count ?? 1
-            parts.append(n > 1 ? "\(n) fichiers" : "Fichier")
+            parts.append(n > 1 ? L(fr: "\(n) fichiers", en: "\(n) files") : L(fr: "Fichier", en: "File"))
         }
         if let source, !source.isEmpty { parts.append(source) }
         parts.append(Self.relativeAge(from: date, to: now))
@@ -126,11 +126,11 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
         return Color(red: r, green: g, blue: b)
     }
 
-    private static func relativeAge(from: Date, to: Date) -> String {
+    @MainActor private static func relativeAge(from: Date, to: Date) -> String {
         let s = max(0, to.timeIntervalSince(from))
-        if s < 60 { return "à l'instant" }
-        if s < 3600 { return "il y a \(Int(s / 60)) min" }
-        if s < 86400 { return "il y a \(Int(s / 3600)) h" }
-        return "il y a \(Int(s / 86400)) j"
+        if s < 60 { return L(fr: "à l'instant", en: "just now") }
+        if s < 3600 { return L(fr: "il y a \(Int(s / 60)) min", en: "\(Int(s / 60)) min ago") }
+        if s < 86400 { return L(fr: "il y a \(Int(s / 3600)) h", en: "\(Int(s / 3600)) h ago") }
+        return L(fr: "il y a \(Int(s / 86400)) j", en: "\(Int(s / 86400)) d ago")
     }
 }

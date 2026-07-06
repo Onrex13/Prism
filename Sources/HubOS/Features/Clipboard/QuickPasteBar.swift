@@ -30,7 +30,7 @@ struct QuickPasteBar: View {
             Image(systemName: "doc.on.clipboard.fill")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Theme.brandGradient)
-            Text("Presse-papiers")
+            Text(L(fr: "Presse-papiers", en: "Clipboard"))
                 .font(.system(size: 14, weight: .bold))
 
             if !controller.query.isEmpty {
@@ -44,9 +44,9 @@ struct QuickPasteBar: View {
             }
 
             Spacer()
-            hint("←→", "naviguer")
-            hint("⏎", "coller")
-            hint("esc", "fermer")
+            hint("←→", L(fr: "naviguer", en: "navigate"))
+            hint("⏎", L(fr: "coller", en: "paste"))
+            hint("esc", L(fr: "fermer", en: "close"))
         }
     }
 
@@ -69,7 +69,9 @@ struct QuickPasteBar: View {
                 Image(systemName: "tray")
                     .font(.system(size: 26, weight: .light))
                     .foregroundStyle(.secondary)
-                Text(controller.query.isEmpty ? "Historique vide" : "Aucun résultat")
+                Text(controller.query.isEmpty
+                     ? L(fr: "Historique vide", en: "History empty")
+                     : L(fr: "Aucun résultat", en: "No results"))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
             }
@@ -210,11 +212,11 @@ private struct QuickCard: View {
 
     private var footerText: String {
         switch item.kind {
-        case .image: return "Image"
-        case .color: return "Couleur"
-        case .link:  return item.source ?? "Lien"
-        case .file:  return item.source ?? "Fichier"
-        case .text:  return item.source ?? "Texte"
+        case .image: return L(fr: "Image", en: "Image")
+        case .color: return L(fr: "Couleur", en: "Color")
+        case .link:  return item.source ?? L(fr: "Lien", en: "Link")
+        case .file:  return item.source ?? L(fr: "Fichier", en: "File")
+        case .text:  return item.source ?? L(fr: "Texte", en: "Text")
         }
     }
 }

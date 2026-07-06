@@ -24,7 +24,11 @@ final class MemoryMonitor {
 
     /// Kernel memory-pressure level, mirroring Activity Monitor's colour bar.
     enum Pressure: Int { case normal = 1, warning = 2, critical = 4
-        var label: String { self == .normal ? "Normale" : self == .warning ? "Élevée" : "Critique" }
+        @MainActor var label: String {
+            self == .normal ? L(fr: "Normale", en: "Normal")
+                : self == .warning ? L(fr: "Élevée", en: "High")
+                : L(fr: "Critique", en: "Critical")
+        }
     }
 
     private(set) var sample = Sample()

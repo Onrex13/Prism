@@ -39,7 +39,7 @@ struct FocusView: View {
                     .contentTransition(.numericText())
                     .monospacedDigit()
                 Text(focus.isRunning ? focus.phase.title
-                     : focus.state == .paused ? "En pause" : "Prêt")
+                     : focus.state == .paused ? L(fr: "En pause", en: "Paused") : L(fr: "Prêt", en: "Ready"))
                     .font(.system(size: 10)).foregroundStyle(.secondary)
             }
         }
@@ -56,7 +56,7 @@ struct FocusView: View {
                     .fill(i < focus.dotsFilled ? Theme.red : .white.opacity(0.15))
                     .frame(width: 8, height: 8)
             }
-            Text("· \(focus.totalFocus) aujourd'hui")
+            Text(L(fr: "· \(focus.totalFocus) aujourd'hui", en: "· \(focus.totalFocus) today"))
                 .font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary)
                 .padding(.leading, 4)
         }
@@ -74,7 +74,7 @@ struct FocusView: View {
             Button { focus.toggle() } label: {
                 HStack(spacing: 6) {
                     Image(systemName: focus.isRunning ? "pause.fill" : "play.fill")
-                    Text(focus.state == .idle ? "Démarrer" : focus.isRunning ? "Pause" : "Reprendre")
+                    Text(focus.state == .idle ? L(fr: "Démarrer", en: "Start") : focus.isRunning ? L(fr: "Pause", en: "Pause") : L(fr: "Reprendre", en: "Resume"))
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -91,10 +91,10 @@ struct FocusView: View {
 
     private var focusSettings: some View {
         VStack(spacing: 12) {
-            chipRow("Concentration", [15, 25, 45, 50], focus.focusMinutes, suffix: "min") { focus.focusMinutes = $0 }
-            chipRow("Cycles avant pause longue", [2, 3, 4, 5, 6], focus.sessionsBeforeLong) { focus.sessionsBeforeLong = $0 }
-            chipRow("Pause courte", [3, 5, 10], focus.shortMinutes, suffix: "min") { focus.shortMinutes = $0 }
-            chipRow("Pause longue", [10, 15, 20, 30], focus.longMinutes, suffix: "min") { focus.longMinutes = $0 }
+            chipRow(L(fr: "Concentration", en: "Focus"), [15, 25, 45, 50], focus.focusMinutes, suffix: "min") { focus.focusMinutes = $0 }
+            chipRow(L(fr: "Cycles avant pause longue", en: "Cycles before long break"), [2, 3, 4, 5, 6], focus.sessionsBeforeLong) { focus.sessionsBeforeLong = $0 }
+            chipRow(L(fr: "Pause courte", en: "Short break"), [3, 5, 10], focus.shortMinutes, suffix: "min") { focus.shortMinutes = $0 }
+            chipRow(L(fr: "Pause longue", en: "Long break"), [10, 15, 20, 30], focus.longMinutes, suffix: "min") { focus.longMinutes = $0 }
         }
         .padding(14).glassCard(radius: 16)
         .animation(.smooth(duration: 0.2), value: focus.sessionsBeforeLong)

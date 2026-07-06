@@ -83,13 +83,13 @@ final class CleanerScanner {
     /// Preview-only sample results (empty paths → nothing can be deleted).
     func seedPreview() {
         categories = [
-            CleanerCategory(id: "caches", name: "Caches d'applications", detail: "~/Library/Caches",
+            CleanerCategory(id: "caches", name: L(fr: "Caches d'applications", en: "App caches"), detail: "~/Library/Caches",
                             symbol: "shippingbox.fill", tint: Theme.indigo, paths: [], size: 3_240_000_000),
-            CleanerCategory(id: "logs", name: "Journaux", detail: "~/Library/Logs",
+            CleanerCategory(id: "logs", name: L(fr: "Journaux", en: "Logs"), detail: "~/Library/Logs",
                             symbol: "doc.text.fill", tint: Theme.teal, paths: [], size: 128_000_000),
-            CleanerCategory(id: "trash", name: "Corbeille", detail: "~/.Trash",
+            CleanerCategory(id: "trash", name: L(fr: "Corbeille", en: "Trash"), detail: "~/.Trash",
                             symbol: "trash.fill", tint: Theme.pink, paths: [], size: 1_900_000_000),
-            CleanerCategory(id: "derived", name: "Xcode DerivedData", detail: "Données de build",
+            CleanerCategory(id: "derived", name: "Xcode DerivedData", detail: L(fr: "Données de build", en: "Build data"),
                             symbol: "hammer.fill", tint: Theme.amber, paths: [], size: 5_600_000_000)
         ]
         phase = .ready
@@ -97,23 +97,24 @@ final class CleanerScanner {
 
     // MARK: Categories
 
+    @MainActor
     private static func makeCategories() -> [CleanerCategory] {
         let home = FileManager.default.homeDirectoryForCurrentUser
         var cats: [CleanerCategory] = [
-            CleanerCategory(id: "caches", name: "Caches d'applications",
+            CleanerCategory(id: "caches", name: L(fr: "Caches d'applications", en: "App caches"),
                             detail: "~/Library/Caches", symbol: "shippingbox.fill", tint: Theme.indigo,
                             paths: [home.appendingPathComponent("Library/Caches")]),
-            CleanerCategory(id: "logs", name: "Journaux", detail: "~/Library/Logs",
+            CleanerCategory(id: "logs", name: L(fr: "Journaux", en: "Logs"), detail: "~/Library/Logs",
                             symbol: "doc.text.fill", tint: Theme.teal,
                             paths: [home.appendingPathComponent("Library/Logs")]),
-            CleanerCategory(id: "trash", name: "Corbeille", detail: "~/.Trash",
+            CleanerCategory(id: "trash", name: L(fr: "Corbeille", en: "Trash"), detail: "~/.Trash",
                             symbol: "trash.fill", tint: Theme.pink,
                             paths: [home.appendingPathComponent(".Trash")])
         ]
         let derived = home.appendingPathComponent("Library/Developer/Xcode/DerivedData")
         if FileManager.default.fileExists(atPath: derived.path) {
             cats.append(CleanerCategory(id: "derived", name: "Xcode DerivedData",
-                                        detail: "Données de build", symbol: "hammer.fill", tint: Theme.amber,
+                                        detail: L(fr: "Données de build", en: "Build data"), symbol: "hammer.fill", tint: Theme.amber,
                                         paths: [derived]))
         }
         return cats

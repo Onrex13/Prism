@@ -56,9 +56,9 @@ struct CaffeineView: View {
     private var masterToggle: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Garder mon Mac éveillé")
+                Text(L(fr: "Garder mon Mac éveillé", en: "Keep my Mac awake"))
                     .font(.system(size: 13, weight: .semibold))
-                Text("Empêche l'écran et la mise en veille")
+                Text(L(fr: "Empêche l'écran et la mise en veille", en: "Prevents the screen and sleep"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
@@ -111,7 +111,7 @@ struct CaffeineView: View {
 
     private var durationPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionLabel(text: "Durée")
+            SectionLabel(text: L(fr: "Durée", en: "Duration"))
             HStack(spacing: 6) {
                 ForEach(CaffeineManager.durationOptions.indices, id: \.self) { i in
                     let option = CaffeineManager.durationOptions[i]
@@ -137,15 +137,19 @@ struct CaffeineView: View {
         .animation(.smooth(duration: 0.2), value: caffeine.duration)
     }
 
+    @MainActor
     private static func label(_ minutes: Int?) -> String {
         guard let minutes else { return "∞" }
-        return minutes >= 60 ? "\(minutes / 60) h" : "\(minutes) min"
+        return minutes >= 60
+            ? L(fr: "\(minutes / 60) h", en: "\(minutes / 60) h")
+            : L(fr: "\(minutes) min", en: "\(minutes) min")
     }
 
     // MARK: Footnote
 
     private var footnote: some View {
-        Label("Réversible instantanément · aucun réglage système modifié",
+        Label(L(fr: "Réversible instantanément · aucun réglage système modifié",
+                en: "Instantly reversible · no system setting changed"),
               systemImage: "checkmark.shield.fill")
             .font(.system(size: 10, weight: .medium))
             .foregroundStyle(.tertiary)

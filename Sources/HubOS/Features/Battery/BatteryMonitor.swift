@@ -25,12 +25,12 @@ final class BatteryMonitor {
         var adapterWatts: Int?
         var voltage: Double?        // Volts
 
-        var stateText: String {
-            if !hasBattery { return "Aucune batterie" }
-            if fullyCharged || (pluggedIn && percent >= 100) { return "Chargée" }
-            if charging { return "En charge" }
-            if pluggedIn { return "Branchée" }
-            return "Sur batterie"
+        @MainActor var stateText: String {
+            if !hasBattery { return L(fr: "Aucune batterie", en: "No battery") }
+            if fullyCharged || (pluggedIn && percent >= 100) { return L(fr: "Chargée", en: "Charged") }
+            if charging { return L(fr: "En charge", en: "Charging") }
+            if pluggedIn { return L(fr: "Branchée", en: "Plugged in") }
+            return L(fr: "Sur batterie", en: "On battery")
         }
     }
 

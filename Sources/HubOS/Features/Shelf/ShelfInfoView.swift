@@ -14,14 +14,15 @@ struct ShelfInfoView: View {
 
             VStack(spacing: 4) {
                 Text("Shelf").font(.system(size: 16, weight: .bold))
-                Text("Une étagère au bord droit de l'écran. Dépose-y fichiers, images ou texte, puis re-glisse-les où tu veux.")
+                Text(L(fr: "Une étagère au bord droit de l'écran. Dépose-y fichiers, images ou texte, puis re-glisse-les où tu veux.",
+                       en: "A shelf on the right edge of your screen. Drop files, images or text onto it, then drag them back out wherever you like."))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
             HStack {
-                Text("Activer le Shelf").font(.system(size: 13, weight: .semibold))
+                Text(L(fr: "Activer le Shelf", en: "Enable Shelf")).font(.system(size: 13, weight: .semibold))
                 Spacer()
                 Toggle("", isOn: Binding(get: { enabled },
                                          set: { hub.setEnabled(.shelf, $0) }))
@@ -32,7 +33,8 @@ struct ShelfInfoView: View {
 
             HStack(spacing: 8) {
                 Image(systemName: "arrow.right.to.line").foregroundStyle(Theme.teal)
-                Text("Approche le bord droit ou glisse un fichier vers la droite pour l'ouvrir.")
+                Text(L(fr: "Approche le bord droit ou glisse un fichier vers la droite pour l'ouvrir.",
+                       en: "Move toward the right edge or drag a file rightward to open it."))
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -41,7 +43,8 @@ struct ShelfInfoView: View {
             .glassCard(radius: 14)
 
             if !store.isEmpty {
-                Text("\(store.items.count) élément\(store.items.count > 1 ? "s" : "") en attente")
+                Text(L(fr: "\(store.items.count) élément\(store.items.count > 1 ? "s" : "") en attente",
+                       en: "\(store.items.count) item\(store.items.count > 1 ? "s" : "") waiting"))
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.tertiary)
             }

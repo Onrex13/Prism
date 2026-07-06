@@ -389,7 +389,7 @@ struct NotchView: View {
                         .foregroundStyle(.white).monospacedDigit()
                     Text(countdown.mode.title)
                         .font(.system(size: 11)).foregroundStyle(.white.opacity(0.6))
-                    Text(countdown.isRunning ? "En cours" : "En pause")
+                    Text(countdown.isRunning ? L(fr: "En cours", en: "Running") : L(fr: "En pause", en: "Paused"))
                         .font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.amber)
                 }
                 Spacer(minLength: 8)

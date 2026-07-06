@@ -12,10 +12,14 @@ final class FocusManager {
 
     enum Phase: String {
         case focus, shortBreak, longBreak
-        var title: String {
-            switch self { case .focus: "Concentration"; case .shortBreak: "Pause courte"; case .longBreak: "Pause longue" }
+        @MainActor var title: String {
+            switch self {
+            case .focus: L(fr: "Concentration", en: "Focus")
+            case .shortBreak: L(fr: "Pause courte", en: "Short break")
+            case .longBreak: L(fr: "Pause longue", en: "Long break")
+            }
         }
-        var short: String { self == .focus ? "Focus" : "Pause" }
+        @MainActor var short: String { self == .focus ? L(fr: "Focus", en: "Focus") : L(fr: "Pause", en: "Break") }
         var symbol: String { self == .focus ? "brain.head.profile" : "cup.and.saucer.fill" }
         var tint: Color { self == .focus ? Theme.red : Theme.teal }
     }

@@ -24,7 +24,11 @@ final class SecurityAuditor {
     enum Severity: Int, Comparable {
         case adware = 0, unsigned = 1, ok = 2
         static func < (l: Severity, r: Severity) -> Bool { l.rawValue < r.rawValue }
-        var label: String { self == .adware ? "Adware connu" : self == .unsigned ? "Non signé" : "Signé" }
+        @MainActor var label: String {
+            self == .adware ? L(fr: "Adware connu", en: "Known adware")
+                : self == .unsigned ? L(fr: "Non signé", en: "Unsigned")
+                : L(fr: "Signé", en: "Signed")
+        }
         var symbol: String { self == .adware ? "exclamationmark.octagon.fill"
             : self == .unsigned ? "questionmark.diamond.fill" : "checkmark.seal.fill" }
     }

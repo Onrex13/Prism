@@ -9,10 +9,10 @@ struct AudioView: View {
     var body: some View {
         VStack(spacing: 14) {
             if audio.volumeAvailable { volumeCard }
-            section("Sortie", symbol: "speaker.wave.2.fill", devices: audio.outputs,
+            section(L(fr: "Sortie", en: "Output"), symbol: "speaker.wave.2.fill", devices: audio.outputs,
                     selected: audio.defaultOutputID) { audio.selectOutput($0) }
             if !audio.inputs.isEmpty {
-                section("Entrée", symbol: "mic.fill", devices: audio.inputs,
+                section(L(fr: "Entrée", en: "Input"), symbol: "mic.fill", devices: audio.inputs,
                         selected: audio.defaultInputID) { audio.selectInput($0) }
             }
         }

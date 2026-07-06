@@ -110,7 +110,8 @@ struct ShelfView: View {
             IconBadge(symbol: "tray.full.fill", tint: Theme.teal, size: 30)
             VStack(alignment: .leading, spacing: 0) {
                 Text("Shelf").font(.system(size: 14, weight: .bold))
-                Text("\(store.items.count) élément\(store.items.count > 1 ? "s" : "")")
+                Text(L(fr: "\(store.items.count) élément\(store.items.count > 1 ? "s" : "")",
+                       en: "\(store.items.count) item\(store.items.count > 1 ? "s" : "")"))
                     .font(.system(size: 10)).foregroundStyle(.secondary)
             }
             Spacer()
@@ -131,9 +132,9 @@ struct ShelfView: View {
             Image(systemName: "arrow.down.to.line")
                 .font(.system(size: 28, weight: .light))
                 .foregroundStyle(Theme.teal.opacity(0.8))
-            Text("Dépose ici")
+            Text(L(fr: "Dépose ici", en: "Drop here"))
                 .font(.system(size: 13, weight: .semibold))
-            Text("Fichiers, images, texte…")
+            Text(L(fr: "Fichiers, images, texte…", en: "Files, images, text…"))
                 .font(.system(size: 11)).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

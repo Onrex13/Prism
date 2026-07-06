@@ -20,9 +20,13 @@ final class CaffeineManager {
         case system
 
         var id: String { rawValue }
-        var title: String { self == .display ? "Écran allumé" : "Système seul" }
-        var detail: String {
-            self == .display ? "L'écran ne s'éteint jamais" : "L'écran peut s'éteindre"
+        @MainActor var title: String {
+            self == .display ? L(fr: "Écran allumé", en: "Display on") : L(fr: "Système seul", en: "System only")
+        }
+        @MainActor var detail: String {
+            self == .display
+                ? L(fr: "L'écran ne s'éteint jamais", en: "The screen never turns off")
+                : L(fr: "L'écran peut s'éteindre", en: "The screen can turn off")
         }
         var symbol: String { self == .display ? "sun.max.fill" : "cpu.fill" }
         var assertionType: String {
@@ -93,10 +97,12 @@ final class CaffeineManager {
 
     /// A friendly one-line status for the module tile / detail hero.
     var statusText: String {
-        guard isActive else { return "Désactivé" }
-        guard let remainingSeconds else { return "Actif · indéfini" }
+        guard isActive else { return L(fr: "Désactivé", en: "Off") }
+        guard let remainingSeconds else { return L(fr: "Actif · indéfini", en: "On · indefinite") }
         let m = remainingSeconds / 60, s = remainingSeconds % 60
-        return m > 0 ? "\(m) min \(String(format: "%02d", s)) s" : "\(s) s"
+        return m > 0
+            ? L(fr: "\(m) min \(String(format: "%02d", s)) s", en: "\(m) min \(String(format: "%02d", s)) s")
+            : L(fr: "\(s) s", en: "\(s) s")
     }
 
     // MARK: Power assertion

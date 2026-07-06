@@ -13,7 +13,7 @@ final class TimerManager {
     enum Mode: String, CaseIterable, Identifiable {
         case countdown, stopwatch
         var id: String { rawValue }
-        var title: String { self == .countdown ? "Minuteur" : "Chrono" }
+        @MainActor var title: String { self == .countdown ? L(fr: "Minuteur", en: "Timer") : L(fr: "Chrono", en: "Stopwatch") }
         var symbol: String { self == .countdown ? "timer" : "stopwatch" }
     }
     enum State { case idle, running, paused }

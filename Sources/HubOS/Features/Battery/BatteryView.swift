@@ -33,7 +33,8 @@ struct BatteryView: View {
             hero
             statsGrid
             if let condition = info.condition {
-                Label("État de la batterie : \(localizedCondition(condition))",
+                Label(L(fr: "État de la batterie : \(localizedCondition(condition))",
+                        en: "Battery condition: \(localizedCondition(condition))"),
                       systemImage: "cross.case.fill")
                     .font(.system(size: 10, weight: .medium)).foregroundStyle(.tertiary)
             }
@@ -90,11 +91,11 @@ struct BatteryView: View {
     private var statsGrid: some View {
         let cols = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
         return LazyVGrid(columns: cols, spacing: 10) {
-            statCard("Santé", info.healthPercent.map { "\($0)%" } ?? "—", "heart.fill", Theme.green)
-            statCard("Cycles", info.cycleCount.map(String.init) ?? "—", "arrow.triangle.2.circlepath", Theme.blue)
-            statCard("Adaptateur", info.adapterWatts.map { "\($0) W" } ?? (info.pluggedIn ? "—" : "Débranché"),
+            statCard(L(fr: "Santé", en: "Health"), info.healthPercent.map { "\($0)%" } ?? "—", "heart.fill", Theme.green)
+            statCard(L(fr: "Cycles", en: "Cycles"), info.cycleCount.map(String.init) ?? "—", "arrow.triangle.2.circlepath", Theme.blue)
+            statCard(L(fr: "Adaptateur", en: "Adapter"), info.adapterWatts.map { "\($0) W" } ?? (info.pluggedIn ? "—" : L(fr: "Débranché", en: "Unplugged")),
                      "powerplug.fill", Theme.amber)
-            statCard("Tension", info.voltage.map { String(format: "%.2f V", $0) } ?? "—",
+            statCard(L(fr: "Tension", en: "Voltage"), info.voltage.map { String(format: "%.2f V", $0) } ?? "—",
                      "bolt.circle.fill", Theme.pink)
         }
     }
@@ -119,8 +120,9 @@ struct BatteryView: View {
         VStack(spacing: 12) {
             Image(systemName: "powerplug.fill")
                 .font(.system(size: 40, weight: .light)).foregroundStyle(.secondary)
-            Text("Aucune batterie").font(.system(size: 15, weight: .semibold))
-            Text("Ce Mac est alimenté en permanence sur secteur.")
+            Text(L(fr: "Aucune batterie", en: "No battery")).font(.system(size: 15, weight: .semibold))
+            Text(L(fr: "Ce Mac est alimenté en permanence sur secteur.",
+                   en: "This Mac is always powered from the wall."))
                 .font(.system(size: 11)).foregroundStyle(.secondary).multilineTextAlignment(.center)
         }
         .padding(.vertical, 30).padding(.horizontal, 20)
@@ -134,7 +136,7 @@ struct BatteryView: View {
     }
 
     private func localizedCondition(_ c: String) -> String {
-        switch c { case "Good": return "Bon"; case "Fair": return "Correct"
-        case "Poor": return "Faible"; default: return c }
+        switch c { case "Good": return L(fr: "Bon", en: "Good"); case "Fair": return L(fr: "Correct", en: "Fair")
+        case "Poor": return L(fr: "Faible", en: "Poor"); default: return c }
     }
 }

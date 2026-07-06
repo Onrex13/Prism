@@ -36,7 +36,7 @@ struct ClipboardView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.secondary)
-            TextField("Rechercher…", text: $store.searchText)
+            TextField(L(fr: "Rechercher…", en: "Search…"), text: $store.searchText)
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
             if !store.searchText.isEmpty {
@@ -61,10 +61,13 @@ struct ClipboardView: View {
             Image(systemName: "doc.on.clipboard")
                 .font(.system(size: 34, weight: .light))
                 .foregroundStyle(Theme.indigo.opacity(0.8))
-            Text(store.searchText.isEmpty ? "Ton historique apparaîtra ici" : "Aucun résultat")
+            Text(store.searchText.isEmpty
+                 ? L(fr: "Ton historique apparaîtra ici", en: "Your history will appear here")
+                 : L(fr: "Aucun résultat", en: "No results"))
                 .font(.system(size: 13, weight: .semibold))
             if store.searchText.isEmpty {
-                Text("Copie du texte, une image ou un fichier (⌘C)")
+                Text(L(fr: "Copie du texte, une image ou un fichier (⌘C)",
+                       en: "Copy text, an image, or a file (⌘C)"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -78,7 +81,8 @@ struct ClipboardView: View {
 
     private var footer: some View {
         HStack {
-            Text("\(store.items.count) élément\(store.items.count > 1 ? "s" : "")")
+            Text(L(fr: "\(store.items.count) élément\(store.items.count > 1 ? "s" : "")",
+                   en: "\(store.items.count) item\(store.items.count == 1 ? "" : "s")"))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.tertiary)
             Spacer()
@@ -88,7 +92,7 @@ struct ClipboardView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "trash")
-                        Text("Tout effacer")
+                        Text(L(fr: "Tout effacer", en: "Clear all"))
                     }
                     .font(.system(size: 11, weight: .medium))
                 }
@@ -181,7 +185,7 @@ private struct ClipboardRow: View {
     private var trailing: some View {
         HStack(spacing: 6) {
             if justCopied {
-                Label("Copié", systemImage: "checkmark")
+                Label(L(fr: "Copié", en: "Copied"), systemImage: "checkmark")
                     .labelStyle(.iconOnly)
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Theme.green)
@@ -202,7 +206,7 @@ private struct ClipboardRow: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help(item.pinned ? "Détacher" : "Épingler")
+                .help(item.pinned ? L(fr: "Détacher", en: "Unpin") : L(fr: "Épingler", en: "Pin"))
 
                 Button {
                     withAnimation(.smooth) { store.delete(item) }
@@ -212,7 +216,7 @@ private struct ClipboardRow: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help("Supprimer")
+                .help(L(fr: "Supprimer", en: "Delete"))
             }
         }
     }

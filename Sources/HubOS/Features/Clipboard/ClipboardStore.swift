@@ -68,15 +68,16 @@ final class ClipboardStore {
 
     private static func flashText(for item: ClipboardItem) -> String {
         switch item.kind {
-        case .image: return "Image copiée"
+        case .image: return L(fr: "Image copiée", en: "Image copied")
         case .file:
-            let name = item.filePaths?.first.map { ($0 as NSString).lastPathComponent } ?? "Fichier"
-            return "Copié · \(name)"
-        case .color: return "Copié · \(item.text)"
+            let name = item.filePaths?.first.map { ($0 as NSString).lastPathComponent } ?? L(fr: "Fichier", en: "File")
+            return L(fr: "Copié · \(name)", en: "Copied · \(name)")
+        case .color: return L(fr: "Copié · \(item.text)", en: "Copied · \(item.text)")
         case .link, .text:
             let s = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: "\n", with: " ")
-            return "Copié · \(s.count > 18 ? String(s.prefix(18)) + "…" : s)"
+            let clipped = s.count > 18 ? String(s.prefix(18)) + "…" : s
+            return L(fr: "Copié · \(clipped)", en: "Copied · \(clipped)")
         }
     }
 

@@ -63,7 +63,7 @@ struct TimerView: View {
                     .foregroundStyle(.white).monospacedDigit()
                     .contentTransition(.numericText())
                 Text(timer.isRunning ? timer.mode.title
-                     : timer.state == .paused ? "En pause" : "Prêt")
+                     : timer.state == .paused ? L(fr: "En pause", en: "Paused") : L(fr: "Prêt", en: "Ready"))
                     .font(.system(size: 10)).foregroundStyle(.secondary)
             }
         }
@@ -80,7 +80,7 @@ struct TimerView: View {
             Button { timer.toggle() } label: {
                 HStack(spacing: 6) {
                     Image(systemName: timer.isRunning ? "pause.fill" : "play.fill")
-                    Text(timer.state == .idle ? "Démarrer" : timer.isRunning ? "Pause" : "Reprendre")
+                    Text(timer.state == .idle ? L(fr: "Démarrer", en: "Start") : timer.isRunning ? L(fr: "Pause", en: "Pause") : L(fr: "Reprendre", en: "Resume"))
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -92,11 +92,11 @@ struct TimerView: View {
 
     private var presetPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionLabel(text: "Durée")
+            SectionLabel(text: L(fr: "Durée", en: "Duration"))
             HStack(spacing: 6) {
                 ForEach(presets, id: \.self) { p in
                     Button { timer.presetSeconds = p } label: {
-                        Text(p >= 60 ? "\(p / 60) min" : "\(p) s")
+                        Text(p >= 60 ? L(fr: "\(p / 60) min", en: "\(p / 60) min") : L(fr: "\(p) s", en: "\(p) s"))
                             .font(.system(size: 11, weight: .semibold))
                             .frame(maxWidth: .infinity).padding(.vertical, 8)
                             .background {
@@ -115,7 +115,7 @@ struct TimerView: View {
         HStack(spacing: 10) {
             ForEach([1, 5], id: \.self) { m in
                 Button { timer.addMinutes(m) } label: {
-                    Text("+\(m) min").font(.system(size: 12, weight: .semibold))
+                    Text(L(fr: "+\(m) min", en: "+\(m) min")).font(.system(size: 12, weight: .semibold))
                         .frame(maxWidth: .infinity).padding(.vertical, 9)
                 }
                 .buttonStyle(.glass)

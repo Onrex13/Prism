@@ -13,7 +13,7 @@ struct NotchInfoView: View {
             header
 
             HStack {
-                Text("Activer l'île dynamique")
+                Text(L(fr: "Activer l'île dynamique", en: "Enable Dynamic Island"))
                     .font(.system(size: 13, weight: .semibold))
                 Spacer()
                 Toggle("", isOn: Binding(get: { enabled },
@@ -27,7 +27,7 @@ struct NotchInfoView: View {
 
             customization
 
-            Label("Spotify & Apple Music pris en charge",
+            Label(L(fr: "Spotify & Apple Music pris en charge", en: "Spotify & Apple Music supported"),
                   systemImage: "checkmark.circle.fill")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.tertiary)
@@ -41,7 +41,7 @@ struct NotchInfoView: View {
             IconBadge(symbol: "rectangle.topthird.inset.filled", tint: Theme.pink, size: 54)
             Text("Dynamic Island")
                 .font(.system(size: 16, weight: .bold))
-            Text("Survole l'encoche pour dérouler le lecteur.")
+            Text(L(fr: "Survole l'encoche pour dérouler le lecteur.", en: "Hover the notch to expand the player."))
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
         }
@@ -74,13 +74,13 @@ struct NotchInfoView: View {
 
     private var customization: some View {
         VStack(spacing: 0) {
-            settingRow("Pochette en veille", "photo", $settings.idleArtwork)
+            settingRow(L(fr: "Pochette en veille", en: "Idle artwork"), "photo", $settings.idleArtwork)
             divider
-            settingRow("Waveform en veille", "waveform", $settings.idleWaveform)
+            settingRow(L(fr: "Waveform en veille", en: "Idle waveform"), "waveform", $settings.idleWaveform)
             divider
-            settingRow("Barre de progression", "timeline.selection", $settings.showProgress)
+            settingRow(L(fr: "Barre de progression", en: "Progress bar"), "timeline.selection", $settings.showProgress)
             divider
-            settingRow("Halo ambiant", "sparkles", $settings.ambientGlow)
+            settingRow(L(fr: "Halo ambiant", en: "Ambient glow"), "sparkles", $settings.ambientGlow)
         }
         .padding(.vertical, 4)
         .glassCard(radius: 16)
